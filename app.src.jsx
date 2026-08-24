@@ -388,6 +388,49 @@ const statusClass = (st)=> st==="Built (mock)" ? "bg-emerald-50 text-emerald-700
   : "bg-amber-50 text-amber-700 border-amber-200";
 const imgFor = (id)=> ((typeof window!=="undefined" && window.REQ_IMAGES) || {})[id];
 
+/* ---- Multiple reference screenshots per requirement ----
+   Curated from the real TDS screens captured in the deep-dive recordings.
+   Each entry is an ordered list of {k: frame-key in window.SHOTS, cap: caption}. */
+const REQ_SHOTS = {
+  "REQ-01":[{k:"orderform",cap:"Order entry form — the order/offer detail (Auftragsdetails)"},{k:"orderDetails",cap:"Same order with its workflow & pricing block"}],
+  "REQ-05":[{k:"projectTM",cap:"Background TMs held by the project"},{k:"catOptions",cap:"TM / CAT options applied to an order"}],
+  "REQ-13":[{k:"delivery",cap:"Delivery documents & delivery-date fields"},{k:"orderDetails",cap:"Order detail where the deadline is committed"}],
+  "REQ-17":[{k:"docsPrices",cap:"Document prices & add-ons on the order"}],
+  "REQ-19":[{k:"counting",cap:"Volume counting + CAT analysis result"},{k:"catOptions",cap:"CAT / TM match options"}],
+  "REQ-20":[{k:"comments",cap:"Comment templates library"}],
+  "REQ-21":[{k:"comments",cap:"Comment templates that can be auto-matched"}],
+  "REQ-22":[{k:"comments",cap:"Editable comment templates (override / exclude)"}],
+  "REQ-25":[{k:"orderDetails",cap:"Order detail with special-care flags"},{k:"delivery",cap:"Delivery step where extra checks apply"}],
+  "REQ-27":[{k:"catOptions",cap:"TM options for the order"},{k:"projectTM",cap:"Project-level TMs the behaviour is configured against"}],
+  "REQ-30":[{k:"formats",cap:"Supported & unsupported source file formats"}],
+  "REQ-31":[{k:"its",cap:"ITS rules file alongside the XML source"},{k:"formats",cap:"XML / ITS in the supported-formats list"}],
+  "REQ-32":[{k:"counting",cap:"Volume counting by words / lines / characters"}],
+  "REQ-34":[{k:"catOptions",cap:"CAT match / discount options"},{k:"counting",cap:"Match analysis these options drive"}],
+  "REQ-37":[{k:"xliff",cap:"XLIFF conversion error classification"}],
+  "REQ-39":[{k:"specialPrices",cap:"Special price rows per language pair"},{k:"docsPrices",cap:"Document / add-on prices"}],
+  "REQ-40":[{k:"specialPrices",cap:"Special-price matrix (wildcards / import target)"}],
+  "REQ-41":[{k:"accounting",cap:"Accounting fields on the customer / company"}],
+  "REQ-42":[{k:"accounting",cap:"VAT & currency on the accounting"},{k:"einvoice",cap:"Payment / e-invoice settings"}],
+  "REQ-43":[{k:"masterAgr",cap:"Master-agreement order assigned to purchase"}],
+  "REQ-44":[{k:"einvoice",cap:"Payment model / terms selector"}],
+  "REQ-45":[{k:"einvoice",cap:"Payment / e-invoice profile"},{k:"specificFields",cap:"Specific fields an e-invoice needs"}],
+  "REQ-46":[{k:"invoices",cap:"Invoices & credit notes"},{k:"specificFields",cap:"Specific fields for collective invoicing"}],
+  "REQ-47":[{k:"specificFields",cap:"Required / specific fields & grouping"},{k:"invoices",cap:"How they split the invoices"}],
+  "REQ-48":[{k:"accounting",cap:"Billing recipient & address on the accounting"},{k:"masterAgr",cap:"Agreement that fixes the recipient"}],
+  "REQ-49":[{k:"invoices",cap:"Invoices & credit notes (cancel → reissue)"},{k:"delivery",cap:"Delivery documents that trigger the invoice"}],
+  "REQ-50":[{k:"invoices",cap:"Invoice produced after completion"}],
+};
+const SHOTS_SRC = ()=> (typeof window!=="undefined" && window.SHOTS) || {};
+/* Returns an ordered array of {src, cap} for a requirement: curated multi-set first,
+   else the single legacy screenshot, else empty. */
+const imgsFor = (id)=>{
+  const set = REQ_SHOTS[id];
+  if(set){ const S=SHOTS_SRC(); return set.map(s=>({src:S[s.k], cap:s.cap})).filter(x=>x.src); }
+  const single = imgFor(id);
+  return single ? [{src:single, cap:null}] : [];
+};
+const shotCount = (id)=> imgsFor(id).length;
+
 /* ---- Broad epic groups (themes) ---- */
 const EPICS=[
   {key:"intake", title:"1 · Order intake & entry", desc:"Creating and listing standalone translation orders, and starting an offer from a client + language pairs.",
@@ -1627,7 +1670,7 @@ function ReqRow({r, goFeature, openDoc}){
       <td className="px-4 py-3 font-mono text-xs text-zinc-500 whitespace-nowrap">{r.id}</td>
       <td className="px-4 py-3">
         <div className="font-medium flex items-center gap-1.5">{r.title}
-          {imgFor(r.id) && <svg title="Has reference screenshot" className="text-zinc-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>}
+          {shotCount(r.id)>0 && <span title={shotCount(r.id)>1?`${shotCount(r.id)} reference screenshots`:"Has reference screenshot"} className="inline-flex items-center gap-0.5 text-zinc-400"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg>{shotCount(r.id)>1 && <span className="text-[10px] font-medium">×{shotCount(r.id)}</span>}</span>}
           {changesFor(r.id).length>0 && <span title="Has prototype change notes" className="rounded-full bg-amber-100 text-amber-700 border border-amber-200 px-1.5 py-0.5 text-[10px] font-medium">Updated · {changesFor(r.id).length}</span>}
         </div>
         <div className="text-xs text-zinc-500 italic mt-0.5 max-w-2xl">{storyOf(r.id)}</div>
@@ -1758,11 +1801,18 @@ function DocsPanel({reqId, open, setOpen}){
                 <div className="mt-3 text-[10px] text-zinc-400">Paraphrased from the meeting transcript for readability.</div>
               </div>
             </div>
-            {imgFor(r.id) ? (
+            {imgsFor(r.id).length ? (
               <div className="mt-4 max-w-5xl">
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1 flex items-center gap-2">Reference — current TDS screen shown in {m.tag}
-                  <span className="text-[10px] font-normal normal-case text-zinc-400">(from the recording)</span></div>
-                <img src={imgFor(r.id)} alt={r.id+" reference screen"} className="w-full rounded-lg border border-zinc-200 shadow-sm"/>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1 flex items-center gap-2">Reference — current TDS screen{imgsFor(r.id).length>1?"s":""} shown in {m.tag}
+                  <span className="text-[10px] font-normal normal-case text-zinc-400">(from the recording{imgsFor(r.id).length>1?` · ${imgsFor(r.id).length} screens`:""})</span></div>
+                <div className="space-y-3">
+                  {imgsFor(r.id).map((im,i)=>(
+                    <figure key={i} className="m-0">
+                      <img src={im.src} alt={r.id+" reference "+(i+1)} className="w-full rounded-lg border border-zinc-200 shadow-sm"/>
+                      {im.cap && <figcaption className="mt-1 text-[11px] text-zinc-500">{imgsFor(r.id).length>1?`${i+1}. `:""}{im.cap}</figcaption>}
+                    </figure>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="mt-4 text-[11px] text-zinc-400 border-t border-zinc-100 pt-3">No current-system screen for this requirement — it is net-new functionality, so no screenshot is attached (left intentionally empty).</div>
@@ -1912,10 +1962,17 @@ function RequirementDrawer({reqId, open, onClose, setRoute}){
               </div>
             </div>
           )}
-          {imgFor(r.id) ? (
+          {imgsFor(r.id).length ? (
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Reference — current TDS screen shown in {m.tag} <span className="font-normal normal-case">(from the recording)</span></div>
-              <img src={imgFor(r.id)} alt={r.id+" reference"} className="w-full rounded-lg border border-zinc-200 shadow-sm"/>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Reference — current TDS screen{imgsFor(r.id).length>1?"s":""} shown in {m.tag} <span className="font-normal normal-case">(from the recording{imgsFor(r.id).length>1?` · ${imgsFor(r.id).length}`:""})</span></div>
+              <div className="space-y-3">
+                {imgsFor(r.id).map((im,i)=>(
+                  <figure key={i} className="m-0">
+                    <img src={im.src} alt={r.id+" reference "+(i+1)} className="w-full rounded-lg border border-zinc-200 shadow-sm"/>
+                    {im.cap && <figcaption className="mt-1 text-[11px] text-zinc-500">{imgsFor(r.id).length>1?`${i+1}. `:""}{im.cap}</figcaption>}
+                  </figure>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="text-[11px] text-zinc-400 border-t border-zinc-100 pt-3">No current-system screen for this requirement — it is net-new functionality, so no screenshot is attached.</div>

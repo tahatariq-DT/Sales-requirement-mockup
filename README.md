@@ -18,8 +18,9 @@ opens in any browser.
 - **Offers** attached to projects, with a clickable offer-detail drawer (price variants + line items).
 - **Requirements** tab — a traceability table of **69 requirements** across 7 epic groups, each
   with a user story, the source meeting + speaker, a deep link to the recording at the exact
-  timestamp, an "also discussed in" list for revisits, reference screenshots (where available),
-  and prototype change notes.
+  timestamp, an "also discussed in" list for revisits, one or more reference screenshots (where
+  available — requirements that touch several TDS screens show a captioned gallery), and
+  prototype change notes.
 
 ## Requirements sources (meetings)
 
@@ -51,7 +52,8 @@ latest build, so you can also just open it directly without building.
 
 ```
 app.src.jsx        # THE source of truth — all screens, components, data, requirements
-images.js          # base64 reference screenshots (window.REQ_IMAGES)
+images.js          # base64 single reference screenshots (window.REQ_IMAGES)
+shots.js           # base64 TDS frames for multi-screenshot requirements (window.SHOTS)
 tw.in.css          # Tailwind entry
 build2.js          # compiles JSX (Babel, classic runtime) → app.compiled.js + scan.txt
 assemble3.js       # inlines React + Tailwind + images + app → sales_module_prototype.html
