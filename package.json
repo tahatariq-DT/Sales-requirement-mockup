@@ -1,0 +1,19 @@
+{
+  "name": "sales-module-prototype",
+  "version": "1.0.0",
+  "description": "DigitalTolk / 24translate TMS — Sales (order-entry) module clickable frontend prototype with requirements traceability.",
+  "scripts": {
+    "build": "node build2.js && ./node_modules/.bin/tailwindcss -i tw.in.css -o tw.out.css --content scan.txt && node assemble3.js",
+    "clean": "rm -f app.compiled.js scan.txt tw.out.css"
+  },
+  "keywords": ["digitaltolk", "tms", "sales", "prototype", "requirements"],
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^8.0.1",
+    "@babel/preset-react": "^8.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.19"
+  }
+}
