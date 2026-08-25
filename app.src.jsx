@@ -1030,51 +1030,83 @@ const DELIVERY=[
 ];
 const COST_RATE=0.085;
 const MIN_MARGIN=40;
-const LANGS=["DE-DE","EN-GB","EN-US","FR-FR","IT-IT","SV-SE","ES-ES","NL-NL","DA-DK","NB-NO"];
-const CUSTOMERS=["Zürich Insurance","Max Planck Institute","Toyota Nordic","UBS","Swisscom","Helvetia"];
-const WORDS_BY_LANG={"DE-DE":1000,"EN-GB":1780,"EN-US":1180,"FR-FR":1460,"IT-IT":990,"SV-SE":760,"ES-ES":1320,"NL-NL":880,"DA-DK":640,"NB-NO":700};
-const MATCH_BY_LANG={"DE-DE":20,"EN-GB":18,"EN-US":15,"FR-FR":12,"IT-IT":22,"SV-SE":9,"ES-ES":14,"NL-NL":11,"DA-DK":8,"NB-NO":10};
+const LANGS=["DE-DE","DE-CH","EN-GB","EN-US","FR-FR","FR-CH","IT-IT","IT-CH","SV-SE","ES-ES","NL-NL","DA-DK","NB-NO"];
+const CUSTOMERS=["Max Müller","Zürich Insurance","Max Planck Institute","Toyota Nordic","UBS","Swisscom","Helvetia"];
+const WORDS_BY_LANG={"DE-DE":1000,"DE-CH":1000,"EN-GB":1780,"EN-US":1180,"FR-FR":1460,"FR-CH":1460,"IT-IT":990,"IT-CH":990,"SV-SE":760,"ES-ES":1320,"NL-NL":880,"DA-DK":640,"NB-NO":700};
+const MATCH_BY_LANG={"DE-DE":20,"DE-CH":20,"EN-GB":18,"EN-US":15,"FR-FR":12,"FR-CH":12,"IT-IT":22,"IT-CH":22,"SV-SE":9,"ES-ES":14,"NL-NL":11,"DA-DK":8,"NB-NO":10};
+/* Offer-builder option lists (echo the hand-sketched 3031 offer) */
+const SPECIALIZATIONS=["General","Marketing","Legal","Technical","Medical","Financial","Life sciences"];
+const COMPANY_DEPTS=["Müller AG · Müller Marketing","Zürich Group · Insurance","Max Planck · Research","UBS Group · Legal","Swisscom · Comms"];
+const PROJECT_OPTS=["— none —","Müller Magazin","Zürich – Insurance DE base","MPI – Research magazine","UBS – Legal"];
+const OFFER_ADDONS=[
+  {key:"superproof", label:"Super-proof", price:50, note:"extra proofreading pass"},
+  {key:"dtp",        label:"DTP / layout", price:150, note:"desktop publishing"},
+  {key:"cert",       label:"Certification stamp", price:45, note:""},
+  {key:"apostille",  label:"Apostille", price:60, note:""},
+];
+const SRC_FILES=[
+  {name:"mueller_magazin_q3.docx", words:820, type:"Word"},
+  {name:"cover_editorial.docx", words:410, type:"Word"},
+  {name:"captions.xlsx", words:310, type:"Excel"},
+];
+const OFFER_STATUS_CLASS=(s)=> s==="Sent" ? "bg-blue-50 text-blue-700 border-blue-200"
+  : s==="Accepted" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+  : s==="Declined" ? "bg-rose-50 text-rose-700 border-rose-200"
+  : "bg-zinc-100 text-zinc-500 border-zinc-200";
 
 function OfferBuilder({openDoc}){
-  const [client,setClient]=useState("Zürich Insurance");
-  const [source,setSource]=useState("DE-DE");
-  const [targets,setTargets]=useState(["EN-GB","FR-FR","IT-IT"]);
+  const HEADER_ID="3031";
+  const [client,setClient]=useState("Max Müller");
+  const [companyDept,setCompanyDept]=useState(COMPANY_DEPTS[0]);
+  const [project,setProject]=useState("Müller Magazin");
+  const [spec,setSpec]=useState("Marketing");
+  const [deadline,setDeadline]=useState("2026-08-21T15:45");
+  const [source,setSource]=useState("DE-CH");
+  const [targets,setTargets]=useState(["EN-GB","FR-FR","IT-CH"]);
   const [addLang,setAddLang]=useState("");
-  const [analyzed,setAnalyzed]=useState(false);
-  const [product,setProduct]=useState("Business");
-  const [delivery,setDelivery]=useState("48 hours");
+  const [analyzed,setAnalyzed]=useState(true);
   const [discount,setDiscount]=useState(0);
-  const [addons,setAddons]=useState({cert:false, apostille:false});
+  const [specialPrice,setSpecialPrice]=useState(false);
+  const [addons,setAddons]=useState({superproof:false, dtp:false, cert:false, apostille:false});
+
   const perLang = useMemo(()=>targets.map(t=>({t, words: WORDS_BY_LANG[t]||800, match: MATCH_BY_LANG[t]||10})),[targets]);
   const words = perLang.reduce((s,l)=>s+l.words,0);
-  const addTarget=()=>{ if(addLang){ setTargets(ts=>ts.concat([addLang])); setAddLang(""); setAnalyzed(false); } };
-  const removeTarget=(t)=>{ setTargets(ts=>ts.filter(x=>x!==t)); setAnalyzed(false); };
-  const modeObj = DELIVERY.find(d=>d.key===delivery)||DELIVERY[3];
-  const addonCost = (addons.cert?45:0)+(addons.apostille?60:0);
-  const base = words*RATES[product]*modeObj.mult + addonCost;
-  const price = Math.max(0, base*(1-discount/100));
-  const cost = words*COST_RATE + addonCost*0.5;
-  const margin = price>0 ? Math.round((price-cost)/price*100) : 0;
-  const marginColor = margin<MIN_MARGIN? "text-rose-600" : margin<MIN_MARGIN+10? "text-amber-600":"text-emerald-600";
+  const fileWords = SRC_FILES.reduce((s,f)=>s+f.words,0);
+  const addTarget=()=>{ if(addLang){ setTargets(ts=>ts.concat([addLang])); setAddLang(""); } };
+  const removeTarget=(t)=>{ setTargets(ts=>ts.filter(x=>x!==t)); };
 
+  const addonTotal = OFFER_ADDONS.filter(a=>addons[a.key]).reduce((s,a)=>s+a.price,0);
+  const deliveryMult=(k)=>(DELIVERY.find(d=>d.key===k)||DELIVERY[3]).mult;
+  const priceOf=(product,delivery)=>Math.round(words*RATES[product]*deliveryMult(delivery)*(1-discount/100)) + addonTotal;
+  const costOf =()=> Math.round(words*COST_RATE + addonTotal*0.5);
+  const marginOf=(product,delivery)=>{ const p=priceOf(product,delivery); const c=costOf(); return p>0?Math.round((p-c)/p*100):0; };
+
+  /* Alternate offers — each is its own sendable line with its own status (matches the sketch: 3031-1 SENT …) */
   const [variants,setVariants]=useState([
-    {id:1, label:"Business · 48h", product:"Business", delivery:"48 hours", on:true},
-    {id:2, label:"First · 24h (faster)", product:"First", delivery:"24 hours", on:true},
-    {id:3, label:"Economy · 3–5 days (cheaper)", product:"Economy", delivery:"3–5 days", on:false},
+    {id:"3031-1", product:"Business", delivery:"24 hours", status:"Sent"},
+    {id:"3031-2", product:"Business", delivery:"3–5 days", status:"Draft"},
+    {id:"3031-3", product:"Economy",  delivery:"24 hours", status:"Draft"},
   ]);
-  const variantPrice=(v)=>{
-    const m=DELIVERY.find(d=>d.key===v.delivery)||DELIVERY[3];
-    return Math.round(words*RATES[v.product]*m.mult);
-  };
-  const toggleVar=(id)=>setVariants(vs=>vs.map(v=>v.id===id?{...v,on:!v.on}:v));
+  const [selId,setSelId]=useState("3031-1");
+  const sel = variants.find(v=>v.id===selId)||variants[0];
+  const setVar=(id,field,val)=>setVariants(vs=>vs.map(v=>v.id===id?{...v,[field]:val}:v));
+  const sendVar=(id)=>setVariants(vs=>vs.map(v=>v.id===id?{...v,status:"Sent"}:v));
+  const removeVar=(id)=>setVariants(vs=>vs.filter(v=>v.id!==id));
+  const nextNum=()=> (Math.max(0,...variants.map(v=>parseInt(v.id.split("-")[1])||0))+1);
+  const addVar=()=>setVariants(vs=>vs.concat([{id:HEADER_ID+"-"+nextNum(), product:"Business", delivery:"48 hours", status:"Draft"}]));
+  const dupVar=(id)=>{ const v=variants.find(x=>x.id===id); if(v) setVariants(vs=>vs.concat([{...v, id:HEADER_ID+"-"+nextNum(), status:"Draft"}])); };
+  const sentCount = variants.filter(v=>v.status==="Sent"||v.status==="Accepted").length;
+
+  const fmt = (s)=>{ const d=new Date(s); if(isNaN(d)) return s; return d.toLocaleDateString(undefined,{day:"2-digit",month:"short"})+" · "+d.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"}); };
 
   return (
     <div className="p-6 fade-in">
-      <div className="flex items-center justify-between mb-4">
+      {/* ---- header ---- */}
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">Offer Builder <RefChip reqId="REQ-07" onOpen={openDoc}/></h1>
-          <div className="text-sm text-zinc-500 flex items-center gap-2 flex-wrap">
-            New offer · <span className="text-zinc-700 font-medium">{client||"New client"}</span> ·
+          <h1 className="text-xl font-bold flex items-center gap-2">Offer Builder · <span className="font-mono text-zinc-500">{HEADER_ID}</span> <RefChip reqId="REQ-07" onOpen={openDoc}/></h1>
+          <div className="text-sm text-zinc-500 flex items-center gap-2 flex-wrap mt-0.5">
+            Translation · <span className="text-zinc-700 font-medium">{client||"New client"}</span> ·
             <LangBadge code={source}/> →
             {targets.map(t=><LangBadge key={t} code={t}/>)}
             {targets.length>1 && <span className="text-[11px] text-zinc-400">covers {targets.length} languages</span>}
@@ -1083,183 +1115,249 @@ function OfferBuilder({openDoc}){
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="md">Save draft</Button>
-          <Button size="md">Send offer</Button>
+          <Button size="md">Send selected</Button>
         </div>
       </div>
 
+      {/* ---- top summary strip: delivery/deadline · specialization · languages ---- */}
       <Card className="p-4 mb-4">
-        <div className="font-semibold text-sm mb-3 flex items-center gap-2">Client &amp; languages <RefChip reqId="REQ-29" onOpen={openDoc}/></div>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <div className="text-xs font-medium text-zinc-500 mb-1.5">Client</div>
-            <input list="client-list" value={client} onChange={e=>setClient(e.target.value)} placeholder="Select or type a client name…"
-              className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm"/>
-            <datalist id="client-list">{CUSTOMERS.map(c=><option key={c} value={c}/>)}</datalist>
-            <div className="mt-1 text-[10px] text-zinc-400">Pick an existing client or type a new name from their email.</div>
+        <div className="grid grid-cols-12 gap-4">
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">Delivery deadline <RefChip reqId="REQ-13" onOpen={openDoc}/></div>
+            <input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)}
+              className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"/>
+            <div className="mt-1 text-[10px] text-zinc-400">Real deadline set on acceptance · {fmt(deadline)}</div>
           </div>
-          <div>
-            <div className="text-xs font-medium text-zinc-500 mb-1.5">Source language</div>
-            <select value={source} onChange={e=>setSource(e.target.value)} className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white">
-              {LANGS.map(l=><option key={l}>{l}</option>)}
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5">Specialization</div>
+            <select value={spec} onChange={e=>setSpec(e.target.value)} className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white">
+              {SPECIALIZATIONS.map(s=><option key={s}>{s}</option>)}
             </select>
           </div>
-          <div>
-            <div className="text-xs font-medium text-zinc-500 mb-1.5">Add target language</div>
-            <div className="flex gap-2">
-              <select value={addLang} onChange={e=>setAddLang(e.target.value)} className="flex-1 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white">
-                <option value="">Choose…</option>
-                {LANGS.filter(l=>l!==source&&!targets.includes(l)).map(l=><option key={l}>{l}</option>)}
+          <div className="col-span-6">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5">Language pairs (1 source → many targets)</div>
+            <div className="flex items-center gap-2">
+              <select value={source} onChange={e=>setSource(e.target.value)} className="rounded-lg border border-zinc-200 px-2 py-1.5 text-sm bg-white">
+                {LANGS.map(l=><option key={l}>{l}</option>)}
               </select>
-              <Button size="sm" variant="outline" onClick={addTarget}>Add</Button>
+              <span className="text-zinc-300">→</span>
+              <div className="flex flex-wrap gap-1.5 flex-1">
+                {targets.map(t=>(
+                  <span key={t} className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs">
+                    <LangBadge code={t}/>
+                    <button onClick={()=>removeTarget(t)} className="text-zinc-400 hover:text-rose-600" title="Remove">×</button>
+                  </span>
+                ))}
+                <select value={addLang} onChange={e=>{setAddLang(e.target.value);}} className="rounded-md border border-dashed border-zinc-300 px-2 py-1 text-xs bg-white">
+                  <option value="">+ add…</option>
+                  {LANGS.filter(l=>l!==source&&!targets.includes(l)).map(l=><option key={l}>{l}</option>)}
+                </select>
+                {addLang && <Button size="sm" variant="outline" onClick={addTarget}>Add {addLang}</Button>}
+              </div>
             </div>
           </div>
         </div>
-        <div className="mt-3">
-          <div className="text-xs font-medium text-zinc-500 mb-1.5">Language pairs</div>
-          <div className="flex flex-wrap gap-1.5">
-            {targets.length===0 && <span className="text-xs text-zinc-400">No target languages yet — add at least one.</span>}
-            {targets.map(t=>(
-              <span key={t} className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs">
-                <LangBadge code={source}/><span className="text-zinc-300">→</span><LangBadge code={t}/>
-                <button onClick={()=>removeTarget(t)} className="ml-0.5 text-zinc-400 hover:text-rose-600" title="Remove">×</button>
-              </span>
-            ))}
+      </Card>
+
+      {/* ---- customer · company/dept · project · discount / special price ---- */}
+      <Card className="p-4 mb-4">
+        <div className="grid grid-cols-12 gap-4 items-end">
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">Customer <RefChip reqId="REQ-29" onOpen={openDoc}/></div>
+            <input list="ob-clients" value={client} onChange={e=>setClient(e.target.value)} placeholder="Select or type…"
+              className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm"/>
+            <datalist id="ob-clients">{CUSTOMERS.map(c=><option key={c} value={c}/>)}</datalist>
+          </div>
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">Company / Dept. <RefChip reqId="REQ-03" onOpen={openDoc}/></div>
+            <select value={companyDept} onChange={e=>setCompanyDept(e.target.value)} className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white">
+              {COMPANY_DEPTS.map(c=><option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">Project <RefChip reqId="REQ-04" onOpen={openDoc}/></div>
+            <select value={project} onChange={e=>setProject(e.target.value)} className="w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white">
+              {PROJECT_OPTS.map(p=><option key={p}>{p}</option>)}
+            </select>
+            <div className="mt-1 text-[10px] text-zinc-400">Applies the project's references &amp; special price.</div>
+          </div>
+          <div className="col-span-3">
+            <div className="text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5">Discount / special price <RefChip reqId="REQ-18" onOpen={openDoc}/></div>
+            <div className="flex items-center gap-2">
+              <input type="range" min="0" max="60" value={discount} onChange={e=>setDiscount(+e.target.value)} className="flex-1 accent-zinc-900"/>
+              <span className="text-sm font-medium w-10 text-right">{discount}%</span>
+            </div>
+            <label className="mt-1 flex items-center gap-1.5 text-[11px] text-zinc-500 cursor-pointer">
+              <input type="checkbox" checked={specialPrice} onChange={e=>setSpecialPrice(e.target.checked)}/>
+              Use contract special price <RefChip reqId="REQ-39" onOpen={openDoc}/>
+            </label>
           </div>
         </div>
       </Card>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4">
+          {/* ---- files · volume · CAT ---- */}
           <Card className="p-4">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-sm flex items-center gap-2">CAT analysis <RefChip reqId="REQ-19" onOpen={openDoc}/></div>
-              {!analyzed && <Button size="sm" onClick={()=>setAnalyzed(true)}>Run CAT analysis</Button>}
+              <div className="font-semibold text-sm flex items-center gap-2">Files · volume · CAT analysis <RefChip reqId="REQ-19" onOpen={openDoc}/></div>
+              {!analyzed
+                ? <Button size="sm" onClick={()=>setAnalyzed(true)}>Run CAT analysis</Button>
+                : <span className="text-[11px] text-emerald-600">Analysed · {words.toLocaleString()} billable words</span>}
             </div>
-            {analyzed ? (
-              <table className="w-full text-sm mt-3">
-                <thead className="text-left text-xs text-zinc-500 border-b border-zinc-100">
-                  <tr><th className="py-1 font-medium">Target</th><th className="py-1 font-medium">Words</th><th className="py-1 font-medium">CAT match discount</th></tr>
-                </thead>
-                <tbody>
-                  {perLang.map(l=>(
-                    <tr key={l.t} className="border-b border-zinc-50">
-                      <td className="py-1.5"><LangBadge code={l.t}/></td>
-                      <td className="py-1.5">{l.words.toLocaleString()}</td>
-                      <td className="py-1.5 text-emerald-600">−{l.match}%</td>
-                    </tr>
-                  ))}
-                  <tr><td className="py-1.5 font-medium">Total</td><td className="py-1.5 font-medium">{words.toLocaleString()}</td><td/></tr>
-                </tbody>
-              </table>
-            ):(
-              <div className="mt-3 rounded-lg border border-dashed border-zinc-200 p-4 text-center text-xs text-zinc-400">Upload source files &amp; run analysis to get per-language volume and match discounts.</div>
+            <table className="w-full text-sm mt-3">
+              <thead className="text-left text-xs text-zinc-500 border-b border-zinc-100">
+                <tr><th className="py-1 font-medium">Source file</th><th className="py-1 font-medium">Type</th><th className="py-1 font-medium text-right">Words</th></tr>
+              </thead>
+              <tbody>
+                {SRC_FILES.map(f=>(
+                  <tr key={f.name} className="border-b border-zinc-50">
+                    <td className="py-1.5 flex items-center gap-2">
+                      <svg className="text-zinc-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M14 3v5h5M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>
+                      <span className="font-medium text-zinc-700">{f.name}</span>
+                    </td>
+                    <td className="py-1.5 text-zinc-500">{f.type}</td>
+                    <td className="py-1.5 text-right text-zinc-600">{f.words.toLocaleString()}</td>
+                  </tr>
+                ))}
+                <tr><td className="py-1.5 text-xs text-zinc-500" colSpan={2}>Source volume</td><td className="py-1.5 text-right font-medium">{fileWords.toLocaleString()}</td></tr>
+              </tbody>
+            </table>
+            {analyzed && (
+              <div className="mt-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1">Per target language (CAT match)</div>
+                <table className="w-full text-sm">
+                  <thead className="text-left text-xs text-zinc-500 border-b border-zinc-100">
+                    <tr><th className="py-1 font-medium">Target</th><th className="py-1 font-medium">Words</th><th className="py-1 font-medium">CAT match discount</th></tr>
+                  </thead>
+                  <tbody>
+                    {perLang.map(l=>(
+                      <tr key={l.t} className="border-b border-zinc-50">
+                        <td className="py-1.5"><div className="flex items-center gap-1"><LangBadge code={source}/><span className="text-zinc-300">→</span><LangBadge code={l.t}/></div></td>
+                        <td className="py-1.5">{l.words.toLocaleString()}</td>
+                        <td className="py-1.5 text-emerald-600">−{l.match}%</td>
+                      </tr>
+                    ))}
+                    <tr><td className="py-1.5 font-medium">Total</td><td className="py-1.5 font-medium">{words.toLocaleString()}</td><td/></tr>
+                  </tbody>
+                </table>
+              </div>
             )}
           </Card>
 
+          {/* ---- ALTERNATE OFFERS — the centrepiece ---- */}
           <Card className="p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-xs font-medium text-zinc-500 mb-2">Product (specialization)</div>
-                <div className="flex gap-2">
-                  {Object.keys(RATES).map(pr=>(
-                    <button key={pr} onClick={()=>setProduct(pr)}
-                      className={cx("flex-1 rounded-lg border px-2 py-2 text-xs", product===pr?"border-zinc-900 bg-zinc-900 text-white":"border-zinc-200 hover:bg-zinc-50")}>
-                      {pr}<div className={cx("text-[10px]", product===pr?"text-zinc-300":"text-zinc-400")}>€{RATES[pr]}/w</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs font-medium text-zinc-500 mb-2 flex items-center gap-1.5">Delivery mode <RefChip reqId="REQ-10" onOpen={openDoc}/></div>
-                <div className="space-y-1">
-                  {DELIVERY.map(d=>{
-                    const avail = words<=d.maxWords;
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold text-sm flex items-center gap-2">Alternate offers <RefChip reqId="REQ-08" onOpen={openDoc}/>
+                <span className="text-[11px] font-normal text-zinc-400">· each is sent &amp; tracked on its own <RefChip reqId="REQ-11" onOpen={openDoc}/></span></div>
+              <Button size="sm" variant="outline" onClick={addVar}>+ Add alternate</Button>
+            </div>
+            <div className="overflow-hidden rounded-lg border border-zinc-200">
+              <table className="w-full text-sm">
+                <thead className="text-left text-xs text-zinc-500 border-b border-zinc-200 bg-zinc-50/60">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">Offer</th>
+                    <th className="px-3 py-2 font-medium">Product</th>
+                    <th className="px-3 py-2 font-medium">Delivery</th>
+                    <th className="px-3 py-2 font-medium text-right">Price</th>
+                    <th className="px-3 py-2 font-medium text-right">Margin</th>
+                    <th className="px-3 py-2 font-medium">Status</th>
+                    <th className="px-3 py-2 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {variants.map(v=>{
+                    const pr=priceOf(v.product,v.delivery), mg=marginOf(v.product,v.delivery);
                     return (
-                      <button key={d.key} disabled={!avail} onClick={()=>avail&&setDelivery(d.key)}
-                        title={avail?"":"Volume too high for "+d.key}
-                        className={cx("w-full flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs",
-                          !avail?"border-zinc-100 text-zinc-300 line-through cursor-not-allowed bg-zinc-50":
-                          delivery===d.key?"border-zinc-900 bg-zinc-50":"border-zinc-200 hover:bg-zinc-50")}>
-                        <span>{d.key}</span>
-                        <span className={avail?"text-zinc-400":"text-zinc-300"}>{avail?"×"+d.mult:"n/a"}</span>
-                      </button>
+                      <tr key={v.id} onClick={()=>setSelId(v.id)}
+                        className={cx("border-b border-zinc-50 cursor-pointer", selId===v.id?"bg-zinc-50":"hover:bg-zinc-50/60")}>
+                        <td className="px-3 py-2 font-mono text-xs font-medium">{v.id}{selId===v.id && <span className="ml-1 text-[9px] text-zinc-400">▸</span>}</td>
+                        <td className="px-3 py-2">
+                          <select value={v.product} onClick={e=>e.stopPropagation()} onChange={e=>setVar(v.id,"product",e.target.value)}
+                            className="rounded-md border border-zinc-200 px-1.5 py-1 text-xs bg-white">
+                            {Object.keys(RATES).map(p=><option key={p}>{p}</option>)}
+                          </select>
+                        </td>
+                        <td className="px-3 py-2">
+                          <select value={v.delivery} onClick={e=>e.stopPropagation()} onChange={e=>setVar(v.id,"delivery",e.target.value)}
+                            className="rounded-md border border-zinc-200 px-1.5 py-1 text-xs bg-white">
+                            {DELIVERY.map(d=><option key={d.key}>{d.key}</option>)}
+                          </select>
+                        </td>
+                        <td className="px-3 py-2 text-right font-medium">€{pr.toLocaleString()}</td>
+                        <td className={cx("px-3 py-2 text-right font-medium", mg<MIN_MARGIN?"text-rose-600":"text-emerald-600")}>{mg}%</td>
+                        <td className="px-3 py-2"><Badge className={OFFER_STATUS_CLASS(v.status)}>{v.status}</Badge></td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center justify-end gap-1" onClick={e=>e.stopPropagation()}>
+                            {v.status==="Draft"
+                              ? <Button size="sm" onClick={()=>sendVar(v.id)}>Send</Button>
+                              : <Button size="sm" variant="subtle" onClick={()=>setVar(v.id,"status","Draft")}>Reopen</Button>}
+                            <button title="Duplicate" onClick={()=>dupVar(v.id)} className="rounded-md border border-zinc-200 p-1 hover:bg-zinc-50 text-zinc-500">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+                            <button title="Remove" onClick={()=>removeVar(v.id)} className="rounded-md border border-zinc-200 p-1 hover:bg-rose-50 text-zinc-400 hover:text-rose-600">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg></button>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })}
-                </div>
-                <div className="mt-2 text-[10px] text-zinc-400 flex items-center gap-1">Buffer: customer 08:00 → internal 07:45 <RefChip reqId="REQ-26" onOpen={openDoc}/></div>
-              </div>
+                </tbody>
+              </table>
             </div>
+            <div className="mt-2 text-[11px] text-zinc-400">{variants.length} alternates · {sentCount} sent — the customer picks one; accepting it hands that order to fulfilment. <RefChip reqId="REQ-12" onOpen={openDoc}/></div>
           </Card>
 
+          {/* ---- add-ons as a priced checklist ---- */}
           <Card className="p-4">
-            <div className="font-semibold text-sm mb-2 flex items-center gap-2">Add-ons <RefChip reqId="REQ-17" onOpen={openDoc}/></div>
+            <div className="font-semibold text-sm mb-2 flex items-center gap-2">Add-ons <RefChip reqId="REQ-17" onOpen={openDoc}/>
+              <span className="text-[11px] font-normal text-zinc-400">· priced line items on every alternate <RefChip reqId="REQ-67" onOpen={openDoc}/></span></div>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <label className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 cursor-pointer">
-                <input type="checkbox" checked={addons.cert} onChange={e=>setAddons(a=>({...a,cert:e.target.checked}))}/>
-                Certification stamp <span className="ml-auto text-xs text-zinc-400">+€45</span></label>
-              <label className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 cursor-pointer">
-                <input type="checkbox" checked={addons.apostille} onChange={e=>setAddons(a=>({...a,apostille:e.target.checked}))}/>
-                Apostille <span className="ml-auto text-xs text-zinc-400">+€60</span></label>
-            </div>
-            <div className="mt-2 text-[11px] text-zinc-400">Project-level add-ons auto-apply for this customer/template.</div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="font-semibold text-sm mb-2 flex items-center gap-2">Alternate offers (variants) <RefChip reqId="REQ-08" onOpen={openDoc}/></div>
-            <div className="space-y-2">
-              {variants.map(v=>(
-                <div key={v.id} className={cx("flex items-center justify-between rounded-lg border px-3 py-2", v.on?"border-zinc-300 bg-white":"border-zinc-100 bg-zinc-50")}>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={v.on} onChange={()=>toggleVar(v.id)}/>
-                    <span className={v.on?"":"text-zinc-400"}>{v.label}</span>
-                  </label>
-                  <div className="text-sm font-medium">€{variantPrice(v).toLocaleString()}</div>
-                </div>
+              {OFFER_ADDONS.map(a=>(
+                <label key={a.key} className={cx("flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer", addons[a.key]?"border-zinc-900 bg-zinc-50":"border-zinc-200 hover:bg-zinc-50")}>
+                  <input type="checkbox" checked={!!addons[a.key]} onChange={e=>setAddons(s=>({...s,[a.key]:e.target.checked}))}/>
+                  <span>{a.label}{a.note && <span className="block text-[10px] text-zinc-400">{a.note}</span>}</span>
+                  <span className="ml-auto text-xs font-medium text-zinc-600">+€{a.price}</span>
+                </label>
               ))}
             </div>
-            <div className="mt-2 text-[11px] text-zinc-400">{variants.filter(v=>v.on).length} variants will be sent — customer picks one.</div>
+            {addonTotal>0 && <div className="mt-2 text-[11px] text-zinc-500">Add-ons add <span className="font-medium">+€{addonTotal}</span> to each alternate.</div>}
           </Card>
         </div>
 
+        {/* ---- right: selected-offer economics ---- */}
         <div className="space-y-4">
           <Card className="p-4 sticky top-4">
-            <div className="text-xs text-zinc-500">Offer total (selected config)</div>
-            <div className="text-3xl font-bold mt-1">€{Math.round(price).toLocaleString()}</div>
-            <div className="mt-1 text-[11px] text-zinc-400">{product} · {delivery} · {words.toLocaleString()} words</div>
-
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-zinc-500 flex items-center gap-1">Discount <RefChip reqId="REQ-14" onOpen={openDoc}/></span>
-                <span className="font-medium">{discount}%</span>
-              </div>
-              <input type="range" min="0" max="60" value={discount} onChange={e=>setDiscount(+e.target.value)} className="w-full accent-zinc-900"/>
-              <div className="mt-2 flex gap-1.5">
-                <Button size="sm" variant="subtle" onClick={()=>setDiscount(10)}>Low 10%</Button>
-                <Button size="sm" variant="subtle" onClick={()=>setDiscount(25)}>High 25%</Button>
-                <Button size="sm" variant="ghost" onClick={()=>setDiscount(0)}>Reset</Button>
-              </div>
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-zinc-500">Selected offer</div>
+              <span className="font-mono text-xs text-zinc-500">{sel.id}</span>
             </div>
+            <div className="text-3xl font-bold mt-1">€{priceOf(sel.product,sel.delivery).toLocaleString()}</div>
+            <div className="mt-1 text-[11px] text-zinc-400">{sel.product} · {sel.delivery} · {words.toLocaleString()} words</div>
+            <div className="mt-1"><Badge className={OFFER_STATUS_CLASS(sel.status)}>{sel.status}</Badge></div>
 
             <div className="mt-4 rounded-lg bg-zinc-50 border border-zinc-100 p-3 space-y-1.5 text-xs">
-              <div className="flex justify-between"><span className="text-zinc-500">List price</span><span>€{Math.round(base).toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-500">Discount</span><span className="text-rose-600">−€{Math.round(base-price).toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-500 flex items-center gap-1">Supplier cost <RefChip reqId="REQ-16" onOpen={openDoc}/></span><span>€{Math.round(cost).toLocaleString()}</span></div>
+              <div className="flex justify-between"><span className="text-zinc-500">Base (list)</span><span>€{Math.round(words*RATES[sel.product]*deliveryMult(sel.delivery)).toLocaleString()}</span></div>
+              <div className="flex justify-between"><span className="text-zinc-500">Discount</span><span className="text-rose-600">−{discount}%</span></div>
+              {addonTotal>0 && <div className="flex justify-between"><span className="text-zinc-500">Add-ons</span><span>+€{addonTotal}</span></div>}
+              <div className="flex justify-between"><span className="text-zinc-500 flex items-center gap-1">Supplier cost <RefChip reqId="REQ-16" onOpen={openDoc}/></span><span>€{costOf().toLocaleString()}</span></div>
               <div className="text-[10px] text-zinc-400 -mt-1">cost from Atlas (mock)</div>
             </div>
 
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-zinc-500 flex items-center gap-1">Margin <RefChip reqId="REQ-15" onOpen={openDoc}/></span>
-                <span className={cx("font-bold", marginColor)}>{margin}%</span>
+                <span className={cx("font-bold", marginOf(sel.product,sel.delivery)<MIN_MARGIN?"text-rose-600":"text-emerald-600")}>{marginOf(sel.product,sel.delivery)}%</span>
               </div>
               <div className="h-2 rounded-full bg-zinc-100 overflow-hidden">
-                <div className={cx("h-full rounded-full", margin<MIN_MARGIN?"bg-rose-500":margin<MIN_MARGIN+10?"bg-amber-500":"bg-emerald-500")} style={{width:Math.max(4,Math.min(100,margin))+"%"}}/>
+                <div className={cx("h-full rounded-full", marginOf(sel.product,sel.delivery)<MIN_MARGIN?"bg-rose-500":marginOf(sel.product,sel.delivery)<MIN_MARGIN+10?"bg-amber-500":"bg-emerald-500")} style={{width:Math.max(4,Math.min(100,marginOf(sel.product,sel.delivery)))+"%"}}/>
               </div>
-              {margin<MIN_MARGIN && <div className="mt-1.5 text-[11px] text-rose-600">Below minimum margin ({MIN_MARGIN}%).</div>}
+              {marginOf(sel.product,sel.delivery)<MIN_MARGIN && <div className="mt-1.5 text-[11px] text-rose-600">Below minimum margin ({MIN_MARGIN}%).</div>}
             </div>
 
-            <Button className="w-full mt-4">Send offer</Button>
-            <div className="mt-2 text-center text-[10px] text-zinc-400">Client: <span className="text-zinc-600">{client||"—"}</span> <RefChip reqId="REQ-04" onOpen={openDoc}/></div>
+            {sel.status==="Draft"
+              ? <Button className="w-full mt-4" onClick={()=>sendVar(sel.id)}>Send {sel.id}</Button>
+              : <Button variant="outline" className="w-full mt-4" onClick={()=>setVar(sel.id,"status","Draft")}>Reopen {sel.id}</Button>}
+            <div className="mt-2 text-center text-[10px] text-zinc-400">{client||"—"} · {companyDept} · {project} <RefChip reqId="REQ-04" onOpen={openDoc}/></div>
           </Card>
         </div>
       </div>

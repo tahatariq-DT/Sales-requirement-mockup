@@ -605,6 +605,14 @@ video {
   grid-column: span 2 / span 2;
 }
 
+.col-span-3 {
+  grid-column: span 3 / span 3;
+}
+
+.col-span-6 {
+  grid-column: span 6 / span 6;
+}
+
 .m-0 {
   margin: 0px;
 }
@@ -648,10 +656,6 @@ video {
 
 .mb-6 {
   margin-bottom: 1.5rem;
-}
-
-.ml-0\.5 {
-  margin-left: 0.125rem;
 }
 
 .ml-1 {
@@ -770,6 +774,10 @@ video {
   width: 0.375rem;
 }
 
+.w-10 {
+  width: 2.5rem;
+}
+
 .w-2 {
   width: 0.5rem;
 }
@@ -840,12 +848,12 @@ video {
   cursor: default;
 }
 
-.cursor-not-allowed {
-  cursor: not-allowed;
-}
-
 .cursor-pointer {
   cursor: pointer;
+}
+
+.grid-cols-12 {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
 .grid-cols-2 {
@@ -870,6 +878,10 @@ video {
 
 .items-start {
   align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
 }
 
 .items-center {
@@ -928,12 +940,6 @@ video {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.125rem * var(--tw-space-y-reverse));
-}
-
-.space-y-1 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
 }
 
 .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
@@ -1543,11 +1549,6 @@ video {
   letter-spacing: 0.05em;
 }
 
-.text-amber-600 {
-  --tw-text-opacity: 1;
-  color: rgb(217 119 6 / var(--tw-text-opacity, 1));
-}
-
 .text-amber-700 {
   --tw-text-opacity: 1;
   color: rgb(180 83 9 / var(--tw-text-opacity, 1));
@@ -1729,6 +1730,11 @@ video {
   background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
 }
 
+.hover\:bg-rose-50:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 241 242 / var(--tw-bg-opacity, 1));
+}
+
 .hover\:bg-zinc-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(244 244 245 / var(--tw-bg-opacity, 1));
@@ -1746,6 +1752,10 @@ video {
 .hover\:bg-zinc-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
+}
+
+.hover\:bg-zinc-50\/60:hover {
+  background-color: rgb(250 250 250 / 0.6);
 }
 
 .hover\:bg-zinc-800:hover {
@@ -4371,14 +4381,17 @@ const DELIVERY = [{
 }];
 const COST_RATE = 0.085;
 const MIN_MARGIN = 40;
-const LANGS = ["DE-DE", "EN-GB", "EN-US", "FR-FR", "IT-IT", "SV-SE", "ES-ES", "NL-NL", "DA-DK", "NB-NO"];
-const CUSTOMERS = ["Zürich Insurance", "Max Planck Institute", "Toyota Nordic", "UBS", "Swisscom", "Helvetia"];
+const LANGS = ["DE-DE", "DE-CH", "EN-GB", "EN-US", "FR-FR", "FR-CH", "IT-IT", "IT-CH", "SV-SE", "ES-ES", "NL-NL", "DA-DK", "NB-NO"];
+const CUSTOMERS = ["Max Müller", "Zürich Insurance", "Max Planck Institute", "Toyota Nordic", "UBS", "Swisscom", "Helvetia"];
 const WORDS_BY_LANG = {
   "DE-DE": 1000,
+  "DE-CH": 1000,
   "EN-GB": 1780,
   "EN-US": 1180,
   "FR-FR": 1460,
+  "FR-CH": 1460,
   "IT-IT": 990,
+  "IT-CH": 990,
   "SV-SE": 760,
   "ES-ES": 1320,
   "NL-NL": 880,
@@ -4387,28 +4400,76 @@ const WORDS_BY_LANG = {
 };
 const MATCH_BY_LANG = {
   "DE-DE": 20,
+  "DE-CH": 20,
   "EN-GB": 18,
   "EN-US": 15,
   "FR-FR": 12,
+  "FR-CH": 12,
   "IT-IT": 22,
+  "IT-CH": 22,
   "SV-SE": 9,
   "ES-ES": 14,
   "NL-NL": 11,
   "DA-DK": 8,
   "NB-NO": 10
 };
+/* Offer-builder option lists (echo the hand-sketched 3031 offer) */
+const SPECIALIZATIONS = ["General", "Marketing", "Legal", "Technical", "Medical", "Financial", "Life sciences"];
+const COMPANY_DEPTS = ["Müller AG · Müller Marketing", "Zürich Group · Insurance", "Max Planck · Research", "UBS Group · Legal", "Swisscom · Comms"];
+const PROJECT_OPTS = ["— none —", "Müller Magazin", "Zürich – Insurance DE base", "MPI – Research magazine", "UBS – Legal"];
+const OFFER_ADDONS = [{
+  key: "superproof",
+  label: "Super-proof",
+  price: 50,
+  note: "extra proofreading pass"
+}, {
+  key: "dtp",
+  label: "DTP / layout",
+  price: 150,
+  note: "desktop publishing"
+}, {
+  key: "cert",
+  label: "Certification stamp",
+  price: 45,
+  note: ""
+}, {
+  key: "apostille",
+  label: "Apostille",
+  price: 60,
+  note: ""
+}];
+const SRC_FILES = [{
+  name: "mueller_magazin_q3.docx",
+  words: 820,
+  type: "Word"
+}, {
+  name: "cover_editorial.docx",
+  words: 410,
+  type: "Word"
+}, {
+  name: "captions.xlsx",
+  words: 310,
+  type: "Excel"
+}];
+const OFFER_STATUS_CLASS = s => s === "Sent" ? "bg-blue-50 text-blue-700 border-blue-200" : s === "Accepted" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : s === "Declined" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-zinc-100 text-zinc-500 border-zinc-200";
 function OfferBuilder({
   openDoc
 }) {
-  const [client, setClient] = useState("Zürich Insurance");
-  const [source, setSource] = useState("DE-DE");
-  const [targets, setTargets] = useState(["EN-GB", "FR-FR", "IT-IT"]);
+  const HEADER_ID = "3031";
+  const [client, setClient] = useState("Max Müller");
+  const [companyDept, setCompanyDept] = useState(COMPANY_DEPTS[0]);
+  const [project, setProject] = useState("Müller Magazin");
+  const [spec, setSpec] = useState("Marketing");
+  const [deadline, setDeadline] = useState("2026-08-21T15:45");
+  const [source, setSource] = useState("DE-CH");
+  const [targets, setTargets] = useState(["EN-GB", "FR-FR", "IT-CH"]);
   const [addLang, setAddLang] = useState("");
-  const [analyzed, setAnalyzed] = useState(false);
-  const [product, setProduct] = useState("Business");
-  const [delivery, setDelivery] = useState("48 hours");
+  const [analyzed, setAnalyzed] = useState(true);
   const [discount, setDiscount] = useState(0);
+  const [specialPrice, setSpecialPrice] = useState(false);
   const [addons, setAddons] = useState({
+    superproof: false,
+    dtp: false,
     cert: false,
     apostille: false
   });
@@ -4418,63 +4479,95 @@ function OfferBuilder({
     match: MATCH_BY_LANG[t] || 10
   })), [targets]);
   const words = perLang.reduce((s, l) => s + l.words, 0);
+  const fileWords = SRC_FILES.reduce((s, f) => s + f.words, 0);
   const addTarget = () => {
     if (addLang) {
       setTargets(ts => ts.concat([addLang]));
       setAddLang("");
-      setAnalyzed(false);
     }
   };
   const removeTarget = t => {
     setTargets(ts => ts.filter(x => x !== t));
-    setAnalyzed(false);
   };
-  const modeObj = DELIVERY.find(d => d.key === delivery) || DELIVERY[3];
-  const addonCost = (addons.cert ? 45 : 0) + (addons.apostille ? 60 : 0);
-  const base = words * RATES[product] * modeObj.mult + addonCost;
-  const price = Math.max(0, base * (1 - discount / 100));
-  const cost = words * COST_RATE + addonCost * 0.5;
-  const margin = price > 0 ? Math.round((price - cost) / price * 100) : 0;
-  const marginColor = margin < MIN_MARGIN ? "text-rose-600" : margin < MIN_MARGIN + 10 ? "text-amber-600" : "text-emerald-600";
+  const addonTotal = OFFER_ADDONS.filter(a => addons[a.key]).reduce((s, a) => s + a.price, 0);
+  const deliveryMult = k => (DELIVERY.find(d => d.key === k) || DELIVERY[3]).mult;
+  const priceOf = (product, delivery) => Math.round(words * RATES[product] * deliveryMult(delivery) * (1 - discount / 100)) + addonTotal;
+  const costOf = () => Math.round(words * COST_RATE + addonTotal * 0.5);
+  const marginOf = (product, delivery) => {
+    const p = priceOf(product, delivery);
+    const c = costOf();
+    return p > 0 ? Math.round((p - c) / p * 100) : 0;
+  };
+
+  /* Alternate offers — each is its own sendable line with its own status (matches the sketch: 3031-1 SENT …) */
   const [variants, setVariants] = useState([{
-    id: 1,
-    label: "Business · 48h",
+    id: "3031-1",
+    product: "Business",
+    delivery: "24 hours",
+    status: "Sent"
+  }, {
+    id: "3031-2",
+    product: "Business",
+    delivery: "3–5 days",
+    status: "Draft"
+  }, {
+    id: "3031-3",
+    product: "Economy",
+    delivery: "24 hours",
+    status: "Draft"
+  }]);
+  const [selId, setSelId] = useState("3031-1");
+  const sel = variants.find(v => v.id === selId) || variants[0];
+  const setVar = (id, field, val) => setVariants(vs => vs.map(v => v.id === id ? {
+    ...v,
+    [field]: val
+  } : v));
+  const sendVar = id => setVariants(vs => vs.map(v => v.id === id ? {
+    ...v,
+    status: "Sent"
+  } : v));
+  const removeVar = id => setVariants(vs => vs.filter(v => v.id !== id));
+  const nextNum = () => Math.max(0, ...variants.map(v => parseInt(v.id.split("-")[1]) || 0)) + 1;
+  const addVar = () => setVariants(vs => vs.concat([{
+    id: HEADER_ID + "-" + nextNum(),
     product: "Business",
     delivery: "48 hours",
-    on: true
-  }, {
-    id: 2,
-    label: "First · 24h (faster)",
-    product: "First",
-    delivery: "24 hours",
-    on: true
-  }, {
-    id: 3,
-    label: "Economy · 3–5 days (cheaper)",
-    product: "Economy",
-    delivery: "3–5 days",
-    on: false
-  }]);
-  const variantPrice = v => {
-    const m = DELIVERY.find(d => d.key === v.delivery) || DELIVERY[3];
-    return Math.round(words * RATES[v.product] * m.mult);
+    status: "Draft"
+  }]));
+  const dupVar = id => {
+    const v = variants.find(x => x.id === id);
+    if (v) setVariants(vs => vs.concat([{
+      ...v,
+      id: HEADER_ID + "-" + nextNum(),
+      status: "Draft"
+    }]));
   };
-  const toggleVar = id => setVariants(vs => vs.map(v => v.id === id ? {
-    ...v,
-    on: !v.on
-  } : v));
+  const sentCount = variants.filter(v => v.status === "Sent" || v.status === "Accepted").length;
+  const fmt = s => {
+    const d = new Date(s);
+    if (isNaN(d)) return s;
+    return d.toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short"
+    }) + " · " + d.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "p-6 fade-in"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between mb-4"
+    className: "flex items-start justify-between mb-4"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
     className: "text-xl font-bold flex items-center gap-2"
-  }, "Offer Builder ", /*#__PURE__*/React.createElement(RefChip, {
+  }, "Offer Builder · ", /*#__PURE__*/React.createElement("span", {
+    className: "font-mono text-zinc-500"
+  }, HEADER_ID), " ", /*#__PURE__*/React.createElement(RefChip, {
     reqId: "REQ-07",
     onOpen: openDoc
   })), /*#__PURE__*/React.createElement("div", {
-    className: "text-sm text-zinc-500 flex items-center gap-2 flex-wrap"
-  }, "New offer · ", /*#__PURE__*/React.createElement("span", {
+    className: "text-sm text-zinc-500 flex items-center gap-2 flex-wrap mt-0.5"
+  }, "Translation · ", /*#__PURE__*/React.createElement("span", {
     className: "text-zinc-700 font-medium"
   }, client || "New client"), " ·", /*#__PURE__*/React.createElement(LangBadge, {
     code: source
@@ -4493,76 +4586,151 @@ function OfferBuilder({
     size: "md"
   }, "Save draft"), /*#__PURE__*/React.createElement(Button, {
     size: "md"
-  }, "Send offer"))), /*#__PURE__*/React.createElement(Card, {
+  }, "Send selected"))), /*#__PURE__*/React.createElement(Card, {
     className: "p-4 mb-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "font-semibold text-sm mb-3 flex items-center gap-2"
-  }, "Client & languages ", /*#__PURE__*/React.createElement(RefChip, {
-    reqId: "REQ-29",
+    className: "grid grid-cols-12 gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5"
+  }, "Delivery deadline ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-13",
     onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs font-medium text-zinc-500 mb-1.5"
-  }, "Client"), /*#__PURE__*/React.createElement("input", {
-    list: "client-list",
-    value: client,
-    onChange: e => setClient(e.target.value),
-    placeholder: "Select or type a client name…",
-    className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm"
-  }), /*#__PURE__*/React.createElement("datalist", {
-    id: "client-list"
-  }, CUSTOMERS.map(c => /*#__PURE__*/React.createElement("option", {
-    key: c,
-    value: c
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-1 text-[10px] text-zinc-400"
-  }, "Pick an existing client or type a new name from their email.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs font-medium text-zinc-500 mb-1.5"
-  }, "Source language"), /*#__PURE__*/React.createElement("select", {
-    value: source,
-    onChange: e => setSource(e.target.value),
+  })), /*#__PURE__*/React.createElement("input", {
+    type: "datetime-local",
+    value: deadline,
+    onChange: e => setDeadline(e.target.value),
     className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"
-  }, LANGS.map(l => /*#__PURE__*/React.createElement("option", {
-    key: l
-  }, l)))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs font-medium text-zinc-500 mb-1.5"
-  }, "Add target language"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
-  }, /*#__PURE__*/React.createElement("select", {
-    value: addLang,
-    onChange: e => setAddLang(e.target.value),
-    className: "flex-1 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "Choose…"), LANGS.filter(l => l !== source && !targets.includes(l)).map(l => /*#__PURE__*/React.createElement("option", {
-    key: l
-  }, l))), /*#__PURE__*/React.createElement(Button, {
-    size: "sm",
-    variant: "outline",
-    onClick: addTarget
-  }, "Add")))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1 text-[10px] text-zinc-400"
+  }, "Real deadline set on acceptance · ", fmt(deadline))), /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "text-xs font-medium text-zinc-500 mb-1.5"
-  }, "Language pairs"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-1.5"
-  }, targets.length === 0 && /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-zinc-400"
-  }, "No target languages yet — add at least one."), targets.map(t => /*#__PURE__*/React.createElement("span", {
-    key: t,
-    className: "inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs"
-  }, /*#__PURE__*/React.createElement(LangBadge, {
-    code: source
-  }), /*#__PURE__*/React.createElement("span", {
+  }, "Specialization"), /*#__PURE__*/React.createElement("select", {
+    value: spec,
+    onChange: e => setSpec(e.target.value),
+    className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"
+  }, SPECIALIZATIONS.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s
+  }, s)))), /*#__PURE__*/React.createElement("div", {
+    className: "col-span-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5"
+  }, "Language pairs (1 source → many targets)"), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: source,
+    onChange: e => setSource(e.target.value),
+    className: "rounded-lg border border-zinc-200 px-2 py-1.5 text-sm bg-white"
+  }, LANGS.map(l => /*#__PURE__*/React.createElement("option", {
+    key: l
+  }, l))), /*#__PURE__*/React.createElement("span", {
     className: "text-zinc-300"
-  }, "→"), /*#__PURE__*/React.createElement(LangBadge, {
+  }, "→"), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap gap-1.5 flex-1"
+  }, targets.map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    className: "inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs"
+  }, /*#__PURE__*/React.createElement(LangBadge, {
     code: t
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => removeTarget(t),
-    className: "ml-0.5 text-zinc-400 hover:text-rose-600",
+    className: "text-zinc-400 hover:text-rose-600",
     title: "Remove"
-  }, "×")))))), /*#__PURE__*/React.createElement("div", {
+  }, "×"))), /*#__PURE__*/React.createElement("select", {
+    value: addLang,
+    onChange: e => {
+      setAddLang(e.target.value);
+    },
+    className: "rounded-md border border-dashed border-zinc-300 px-2 py-1 text-xs bg-white"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "+ add…"), LANGS.filter(l => l !== source && !targets.includes(l)).map(l => /*#__PURE__*/React.createElement("option", {
+    key: l
+  }, l))), addLang && /*#__PURE__*/React.createElement(Button, {
+    size: "sm",
+    variant: "outline",
+    onClick: addTarget
+  }, "Add ", addLang)))))), /*#__PURE__*/React.createElement(Card, {
+    className: "p-4 mb-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-12 gap-4 items-end"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5"
+  }, "Customer ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-29",
+    onOpen: openDoc
+  })), /*#__PURE__*/React.createElement("input", {
+    list: "ob-clients",
+    value: client,
+    onChange: e => setClient(e.target.value),
+    placeholder: "Select or type…",
+    className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm"
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "ob-clients"
+  }, CUSTOMERS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5"
+  }, "Company / Dept. ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-03",
+    onOpen: openDoc
+  })), /*#__PURE__*/React.createElement("select", {
+    value: companyDept,
+    onChange: e => setCompanyDept(e.target.value),
+    className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"
+  }, COMPANY_DEPTS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c
+  }, c)))), /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5"
+  }, "Project ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-04",
+    onOpen: openDoc
+  })), /*#__PURE__*/React.createElement("select", {
+    value: project,
+    onChange: e => setProject(e.target.value),
+    className: "w-full rounded-lg border border-zinc-200 px-3 py-1.5 text-sm bg-white"
+  }, PROJECT_OPTS.map(p => /*#__PURE__*/React.createElement("option", {
+    key: p
+  }, p))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1 text-[10px] text-zinc-400"
+  }, "Applies the project's references & special price.")), /*#__PURE__*/React.createElement("div", {
+    className: "col-span-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-xs font-medium text-zinc-500 mb-1.5 flex items-center gap-1.5"
+  }, "Discount / special price ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-18",
+    onOpen: openDoc
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    min: "0",
+    max: "60",
+    value: discount,
+    onChange: e => setDiscount(+e.target.value),
+    className: "flex-1 accent-zinc-900"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-sm font-medium w-10 text-right"
+  }, discount, "%")), /*#__PURE__*/React.createElement("label", {
+    className: "mt-1 flex items-center gap-1.5 text-[11px] text-zinc-500 cursor-pointer"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: specialPrice,
+    onChange: e => setSpecialPrice(e.target.checked)
+  }), "Use contract special price ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-39",
+    onOpen: openDoc
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-3 gap-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "col-span-2 space-y-4"
@@ -4572,14 +4740,56 @@ function OfferBuilder({
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
     className: "font-semibold text-sm flex items-center gap-2"
-  }, "CAT analysis ", /*#__PURE__*/React.createElement(RefChip, {
+  }, "Files · volume · CAT analysis ", /*#__PURE__*/React.createElement(RefChip, {
     reqId: "REQ-19",
     onOpen: openDoc
-  })), !analyzed && /*#__PURE__*/React.createElement(Button, {
+  })), !analyzed ? /*#__PURE__*/React.createElement(Button, {
     size: "sm",
     onClick: () => setAnalyzed(true)
-  }, "Run CAT analysis")), analyzed ? /*#__PURE__*/React.createElement("table", {
+  }, "Run CAT analysis") : /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] text-emerald-600"
+  }, "Analysed · ", words.toLocaleString(), " billable words")), /*#__PURE__*/React.createElement("table", {
     className: "w-full text-sm mt-3"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "text-left text-xs text-zinc-500 border-b border-zinc-100"
+  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "py-1 font-medium"
+  }, "Source file"), /*#__PURE__*/React.createElement("th", {
+    className: "py-1 font-medium"
+  }, "Type"), /*#__PURE__*/React.createElement("th", {
+    className: "py-1 font-medium text-right"
+  }, "Words"))), /*#__PURE__*/React.createElement("tbody", null, SRC_FILES.map(f => /*#__PURE__*/React.createElement("tr", {
+    key: f.name,
+    className: "border-b border-zinc-50"
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "py-1.5 flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("svg", {
+    className: "text-zinc-400",
+    width: "13",
+    height: "13",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M14 3v5h5M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "font-medium text-zinc-700"
+  }, f.name)), /*#__PURE__*/React.createElement("td", {
+    className: "py-1.5 text-zinc-500"
+  }, f.type), /*#__PURE__*/React.createElement("td", {
+    className: "py-1.5 text-right text-zinc-600"
+  }, f.words.toLocaleString()))), /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("td", {
+    className: "py-1.5 text-xs text-zinc-500",
+    colSpan: 2
+  }, "Source volume"), /*#__PURE__*/React.createElement("td", {
+    className: "py-1.5 text-right font-medium"
+  }, fileWords.toLocaleString())))), analyzed && /*#__PURE__*/React.createElement("div", {
+    className: "mt-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "text-[11px] font-semibold uppercase tracking-wide text-zinc-400 mb-1"
+  }, "Per target language (CAT match)"), /*#__PURE__*/React.createElement("table", {
+    className: "w-full text-sm"
   }, /*#__PURE__*/React.createElement("thead", {
     className: "text-left text-xs text-zinc-500 border-b border-zinc-100"
   }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
@@ -4593,9 +4803,15 @@ function OfferBuilder({
     className: "border-b border-zinc-50"
   }, /*#__PURE__*/React.createElement("td", {
     className: "py-1.5"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1"
   }, /*#__PURE__*/React.createElement(LangBadge, {
+    code: source
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-zinc-300"
+  }, "→"), /*#__PURE__*/React.createElement(LangBadge, {
     code: l.t
-  })), /*#__PURE__*/React.createElement("td", {
+  }))), /*#__PURE__*/React.createElement("td", {
     className: "py-1.5"
   }, l.words.toLocaleString()), /*#__PURE__*/React.createElement("td", {
     className: "py-1.5 text-emerald-600"
@@ -4603,164 +4819,205 @@ function OfferBuilder({
     className: "py-1.5 font-medium"
   }, "Total"), /*#__PURE__*/React.createElement("td", {
     className: "py-1.5 font-medium"
-  }, words.toLocaleString()), /*#__PURE__*/React.createElement("td", null)))) : /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 rounded-lg border border-dashed border-zinc-200 p-4 text-center text-xs text-zinc-400"
-  }, "Upload source files & run analysis to get per-language volume and match discounts.")), /*#__PURE__*/React.createElement(Card, {
+  }, words.toLocaleString()), /*#__PURE__*/React.createElement("td", null)))))), /*#__PURE__*/React.createElement(Card, {
     className: "p-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-4"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs font-medium text-zinc-500 mb-2"
-  }, "Product (specialization)"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
-  }, Object.keys(RATES).map(pr => /*#__PURE__*/React.createElement("button", {
-    key: pr,
-    onClick: () => setProduct(pr),
-    className: cx("flex-1 rounded-lg border px-2 py-2 text-xs", product === pr ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 hover:bg-zinc-50")
-  }, pr, /*#__PURE__*/React.createElement("div", {
-    className: cx("text-[10px]", product === pr ? "text-zinc-300" : "text-zinc-400")
-  }, "€", RATES[pr], "/w"))))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs font-medium text-zinc-500 mb-2 flex items-center gap-1.5"
-  }, "Delivery mode ", /*#__PURE__*/React.createElement(RefChip, {
-    reqId: "REQ-10",
+    className: "flex items-center justify-between mb-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "font-semibold text-sm flex items-center gap-2"
+  }, "Alternate offers ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-08",
     onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-1"
-  }, DELIVERY.map(d => {
-    const avail = words <= d.maxWords;
-    return /*#__PURE__*/React.createElement("button", {
-      key: d.key,
-      disabled: !avail,
-      onClick: () => avail && setDelivery(d.key),
-      title: avail ? "" : "Volume too high for " + d.key,
-      className: cx("w-full flex items-center justify-between rounded-md border px-2.5 py-1.5 text-xs", !avail ? "border-zinc-100 text-zinc-300 line-through cursor-not-allowed bg-zinc-50" : delivery === d.key ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:bg-zinc-50")
-    }, /*#__PURE__*/React.createElement("span", null, d.key), /*#__PURE__*/React.createElement("span", {
-      className: avail ? "text-zinc-400" : "text-zinc-300"
-    }, avail ? "×" + d.mult : "n/a"));
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-[10px] text-zinc-400 flex items-center gap-1"
-  }, "Buffer: customer 08:00 → internal 07:45 ", /*#__PURE__*/React.createElement(RefChip, {
-    reqId: "REQ-26",
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-[11px] font-normal text-zinc-400"
+  }, "· each is sent & tracked on its own ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-11",
     onOpen: openDoc
-  }))))), /*#__PURE__*/React.createElement(Card, {
+  }))), /*#__PURE__*/React.createElement(Button, {
+    size: "sm",
+    variant: "outline",
+    onClick: addVar
+  }, "+ Add alternate")), /*#__PURE__*/React.createElement("div", {
+    className: "overflow-hidden rounded-lg border border-zinc-200"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full text-sm"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "text-left text-xs text-zinc-500 border-b border-zinc-200 bg-zinc-50/60"
+  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "Offer"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "Product"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "Delivery"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium text-right"
+  }, "Price"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium text-right"
+  }, "Margin"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium"
+  }, "Status"), /*#__PURE__*/React.createElement("th", {
+    className: "px-3 py-2 font-medium text-right"
+  }, "Actions"))), /*#__PURE__*/React.createElement("tbody", null, variants.map(v => {
+    const pr = priceOf(v.product, v.delivery),
+      mg = marginOf(v.product, v.delivery);
+    return /*#__PURE__*/React.createElement("tr", {
+      key: v.id,
+      onClick: () => setSelId(v.id),
+      className: cx("border-b border-zinc-50 cursor-pointer", selId === v.id ? "bg-zinc-50" : "hover:bg-zinc-50/60")
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2 font-mono text-xs font-medium"
+    }, v.id, selId === v.id && /*#__PURE__*/React.createElement("span", {
+      className: "ml-1 text-[9px] text-zinc-400"
+    }, "▸")), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: v.product,
+      onClick: e => e.stopPropagation(),
+      onChange: e => setVar(v.id, "product", e.target.value),
+      className: "rounded-md border border-zinc-200 px-1.5 py-1 text-xs bg-white"
+    }, Object.keys(RATES).map(p => /*#__PURE__*/React.createElement("option", {
+      key: p
+    }, p)))), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2"
+    }, /*#__PURE__*/React.createElement("select", {
+      value: v.delivery,
+      onClick: e => e.stopPropagation(),
+      onChange: e => setVar(v.id, "delivery", e.target.value),
+      className: "rounded-md border border-zinc-200 px-1.5 py-1 text-xs bg-white"
+    }, DELIVERY.map(d => /*#__PURE__*/React.createElement("option", {
+      key: d.key
+    }, d.key)))), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2 text-right font-medium"
+    }, "€", pr.toLocaleString()), /*#__PURE__*/React.createElement("td", {
+      className: cx("px-3 py-2 text-right font-medium", mg < MIN_MARGIN ? "text-rose-600" : "text-emerald-600")
+    }, mg, "%"), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2"
+    }, /*#__PURE__*/React.createElement(Badge, {
+      className: OFFER_STATUS_CLASS(v.status)
+    }, v.status)), /*#__PURE__*/React.createElement("td", {
+      className: "px-3 py-2"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center justify-end gap-1",
+      onClick: e => e.stopPropagation()
+    }, v.status === "Draft" ? /*#__PURE__*/React.createElement(Button, {
+      size: "sm",
+      onClick: () => sendVar(v.id)
+    }, "Send") : /*#__PURE__*/React.createElement(Button, {
+      size: "sm",
+      variant: "subtle",
+      onClick: () => setVar(v.id, "status", "Draft")
+    }, "Reopen"), /*#__PURE__*/React.createElement("button", {
+      title: "Duplicate",
+      onClick: () => dupVar(v.id),
+      className: "rounded-md border border-zinc-200 p-1 hover:bg-zinc-50 text-zinc-500"
+    }, /*#__PURE__*/React.createElement("svg", {
+      width: "13",
+      height: "13",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.8"
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: "9",
+      y: "9",
+      width: "11",
+      height: "11",
+      rx: "2"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M5 15V5a2 2 0 0 1 2-2h10"
+    }))), /*#__PURE__*/React.createElement("button", {
+      title: "Remove",
+      onClick: () => removeVar(v.id),
+      className: "rounded-md border border-zinc-200 p-1 hover:bg-rose-50 text-zinc-400 hover:text-rose-600"
+    }, /*#__PURE__*/React.createElement("svg", {
+      width: "13",
+      height: "13",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "1.8"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"
+    }))))));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 text-[11px] text-zinc-400"
+  }, variants.length, " alternates · ", sentCount, " sent — the customer picks one; accepting it hands that order to fulfilment. ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-12",
+    onOpen: openDoc
+  }))), /*#__PURE__*/React.createElement(Card, {
     className: "p-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "font-semibold text-sm mb-2 flex items-center gap-2"
   }, "Add-ons ", /*#__PURE__*/React.createElement(RefChip, {
     reqId: "REQ-17",
     onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-2 text-sm"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: addons.cert,
-    onChange: e => setAddons(a => ({
-      ...a,
-      cert: e.target.checked
-    }))
-  }), "Certification stamp ", /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-xs text-zinc-400"
-  }, "+€45")), /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: addons.apostille,
-    onChange: e => setAddons(a => ({
-      ...a,
-      apostille: e.target.checked
-    }))
-  }), "Apostille ", /*#__PURE__*/React.createElement("span", {
-    className: "ml-auto text-xs text-zinc-400"
-  }, "+€60"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-[11px] text-zinc-400"
-  }, "Project-level add-ons auto-apply for this customer/template.")), /*#__PURE__*/React.createElement(Card, {
-    className: "p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "font-semibold text-sm mb-2 flex items-center gap-2"
-  }, "Alternate offers (variants) ", /*#__PURE__*/React.createElement(RefChip, {
-    reqId: "REQ-08",
-    onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-2"
-  }, variants.map(v => /*#__PURE__*/React.createElement("div", {
-    key: v.id,
-    className: cx("flex items-center justify-between rounded-lg border px-3 py-2", v.on ? "border-zinc-300 bg-white" : "border-zinc-100 bg-zinc-50")
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "flex items-center gap-2 text-sm cursor-pointer"
-  }, /*#__PURE__*/React.createElement("input", {
-    type: "checkbox",
-    checked: v.on,
-    onChange: () => toggleVar(v.id)
   }), /*#__PURE__*/React.createElement("span", {
-    className: v.on ? "" : "text-zinc-400"
-  }, v.label)), /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-medium"
-  }, "€", variantPrice(v).toLocaleString())))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 text-[11px] text-zinc-400"
-  }, variants.filter(v => v.on).length, " variants will be sent — customer picks one."))), /*#__PURE__*/React.createElement("div", {
+    className: "text-[11px] font-normal text-zinc-400"
+  }, "· priced line items on every alternate ", /*#__PURE__*/React.createElement(RefChip, {
+    reqId: "REQ-67",
+    onOpen: openDoc
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-2 text-sm"
+  }, OFFER_ADDONS.map(a => /*#__PURE__*/React.createElement("label", {
+    key: a.key,
+    className: cx("flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer", addons[a.key] ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:bg-zinc-50")
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!addons[a.key],
+    onChange: e => setAddons(s => ({
+      ...s,
+      [a.key]: e.target.checked
+    }))
+  }), /*#__PURE__*/React.createElement("span", null, a.label, a.note && /*#__PURE__*/React.createElement("span", {
+    className: "block text-[10px] text-zinc-400"
+  }, a.note)), /*#__PURE__*/React.createElement("span", {
+    className: "ml-auto text-xs font-medium text-zinc-600"
+  }, "+€", a.price)))), addonTotal > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mt-2 text-[11px] text-zinc-500"
+  }, "Add-ons add ", /*#__PURE__*/React.createElement("span", {
+    className: "font-medium"
+  }, "+€", addonTotal), " to each alternate."))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement(Card, {
     className: "p-4 sticky top-4"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "text-xs text-zinc-500"
-  }, "Offer total (selected config)"), /*#__PURE__*/React.createElement("div", {
-    className: "text-3xl font-bold mt-1"
-  }, "€", Math.round(price).toLocaleString()), /*#__PURE__*/React.createElement("div", {
-    className: "mt-1 text-[11px] text-zinc-400"
-  }, product, " · ", delivery, " · ", words.toLocaleString(), " words"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4"
+    className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between text-xs mb-1"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-zinc-500 flex items-center gap-1"
-  }, "Discount ", /*#__PURE__*/React.createElement(RefChip, {
-    reqId: "REQ-14",
-    onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "font-medium"
-  }, discount, "%")), /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    min: "0",
-    max: "60",
-    value: discount,
-    onChange: e => setDiscount(+e.target.value),
-    className: "w-full accent-zinc-900"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 flex gap-1.5"
-  }, /*#__PURE__*/React.createElement(Button, {
-    size: "sm",
-    variant: "subtle",
-    onClick: () => setDiscount(10)
-  }, "Low 10%"), /*#__PURE__*/React.createElement(Button, {
-    size: "sm",
-    variant: "subtle",
-    onClick: () => setDiscount(25)
-  }, "High 25%"), /*#__PURE__*/React.createElement(Button, {
-    size: "sm",
-    variant: "ghost",
-    onClick: () => setDiscount(0)
-  }, "Reset"))), /*#__PURE__*/React.createElement("div", {
+    className: "text-xs text-zinc-500"
+  }, "Selected offer"), /*#__PURE__*/React.createElement("span", {
+    className: "font-mono text-xs text-zinc-500"
+  }, sel.id)), /*#__PURE__*/React.createElement("div", {
+    className: "text-3xl font-bold mt-1"
+  }, "€", priceOf(sel.product, sel.delivery).toLocaleString()), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1 text-[11px] text-zinc-400"
+  }, sel.product, " · ", sel.delivery, " · ", words.toLocaleString(), " words"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1"
+  }, /*#__PURE__*/React.createElement(Badge, {
+    className: OFFER_STATUS_CLASS(sel.status)
+  }, sel.status)), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 rounded-lg bg-zinc-50 border border-zinc-100 p-3 space-y-1.5 text-xs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-zinc-500"
-  }, "List price"), /*#__PURE__*/React.createElement("span", null, "€", Math.round(base).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+  }, "Base (list)"), /*#__PURE__*/React.createElement("span", null, "€", Math.round(words * RATES[sel.product] * deliveryMult(sel.delivery)).toLocaleString())), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-zinc-500"
   }, "Discount"), /*#__PURE__*/React.createElement("span", {
     className: "text-rose-600"
-  }, "−€", Math.round(base - price).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+  }, "−", discount, "%")), addonTotal > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-zinc-500"
+  }, "Add-ons"), /*#__PURE__*/React.createElement("span", null, "+€", addonTotal)), /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between"
   }, /*#__PURE__*/React.createElement("span", {
     className: "text-zinc-500 flex items-center gap-1"
   }, "Supplier cost ", /*#__PURE__*/React.createElement(RefChip, {
     reqId: "REQ-16",
     onOpen: openDoc
-  })), /*#__PURE__*/React.createElement("span", null, "€", Math.round(cost).toLocaleString())), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("span", null, "€", costOf().toLocaleString())), /*#__PURE__*/React.createElement("div", {
     className: "text-[10px] text-zinc-400 -mt-1"
   }, "cost from Atlas (mock)")), /*#__PURE__*/React.createElement("div", {
     className: "mt-3"
@@ -4772,23 +5029,26 @@ function OfferBuilder({
     reqId: "REQ-15",
     onOpen: openDoc
   })), /*#__PURE__*/React.createElement("span", {
-    className: cx("font-bold", marginColor)
-  }, margin, "%")), /*#__PURE__*/React.createElement("div", {
+    className: cx("font-bold", marginOf(sel.product, sel.delivery) < MIN_MARGIN ? "text-rose-600" : "text-emerald-600")
+  }, marginOf(sel.product, sel.delivery), "%")), /*#__PURE__*/React.createElement("div", {
     className: "h-2 rounded-full bg-zinc-100 overflow-hidden"
   }, /*#__PURE__*/React.createElement("div", {
-    className: cx("h-full rounded-full", margin < MIN_MARGIN ? "bg-rose-500" : margin < MIN_MARGIN + 10 ? "bg-amber-500" : "bg-emerald-500"),
+    className: cx("h-full rounded-full", marginOf(sel.product, sel.delivery) < MIN_MARGIN ? "bg-rose-500" : marginOf(sel.product, sel.delivery) < MIN_MARGIN + 10 ? "bg-amber-500" : "bg-emerald-500"),
     style: {
-      width: Math.max(4, Math.min(100, margin)) + "%"
+      width: Math.max(4, Math.min(100, marginOf(sel.product, sel.delivery))) + "%"
     }
-  })), margin < MIN_MARGIN && /*#__PURE__*/React.createElement("div", {
+  })), marginOf(sel.product, sel.delivery) < MIN_MARGIN && /*#__PURE__*/React.createElement("div", {
     className: "mt-1.5 text-[11px] text-rose-600"
-  }, "Below minimum margin (", MIN_MARGIN, "%).")), /*#__PURE__*/React.createElement(Button, {
-    className: "w-full mt-4"
-  }, "Send offer"), /*#__PURE__*/React.createElement("div", {
+  }, "Below minimum margin (", MIN_MARGIN, "%).")), sel.status === "Draft" ? /*#__PURE__*/React.createElement(Button, {
+    className: "w-full mt-4",
+    onClick: () => sendVar(sel.id)
+  }, "Send ", sel.id) : /*#__PURE__*/React.createElement(Button, {
+    variant: "outline",
+    className: "w-full mt-4",
+    onClick: () => setVar(sel.id, "status", "Draft")
+  }, "Reopen ", sel.id), /*#__PURE__*/React.createElement("div", {
     className: "mt-2 text-center text-[10px] text-zinc-400"
-  }, "Client: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-zinc-600"
-  }, client || "—"), " ", /*#__PURE__*/React.createElement(RefChip, {
+  }, client || "—", " · ", companyDept, " · ", project, " ", /*#__PURE__*/React.createElement(RefChip, {
     reqId: "REQ-04",
     onOpen: openDoc
   }))))));
