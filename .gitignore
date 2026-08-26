@@ -10,3 +10,6 @@ tw.out.css
 .DS_Store
 *.log
 node_modules
+
+# vercel build output
+public/
