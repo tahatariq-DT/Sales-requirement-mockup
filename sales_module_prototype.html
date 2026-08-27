@@ -1106,6 +1106,11 @@ video {
   border-color: rgb(217 249 157 / var(--tw-border-opacity, 1));
 }
 
+.border-orange-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(254 215 170 / var(--tw-border-opacity, 1));
+}
+
 .border-rose-200 {
   --tw-border-opacity: 1;
   border-color: rgb(254 205 211 / var(--tw-border-opacity, 1));
@@ -1238,6 +1243,11 @@ video {
 .bg-lime-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(236 252 203 / var(--tw-bg-opacity, 1));
+}
+
+.bg-orange-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 237 213 / var(--tw-bg-opacity, 1));
 }
 
 .bg-rose-100 {
@@ -1628,6 +1638,11 @@ video {
 .text-lime-700 {
   --tw-text-opacity: 1;
   color: rgb(77 124 15 / var(--tw-text-opacity, 1));
+}
+
+.text-orange-700 {
+  --tw-text-opacity: 1;
+  color: rgb(194 65 12 / var(--tw-text-opacity, 1));
 }
 
 .text-rose-500 {
@@ -2237,6 +2252,12 @@ const MEETINGS = {
     tag: "Sales Deep Dive 6",
     color: "bg-lime-100 text-lime-700 border-lime-200",
     attendees: "Dagna Jurk, Clemens Rodde, Rana Taha Tariq"
+  },
+  M8: {
+    id: "M8",
+    tag: "Sales Deep Dive 8",
+    color: "bg-orange-100 text-orange-700 border-orange-200",
+    attendees: "Clemens Rodde, Dagna Jurk, Rana Taha Tariq"
   }
 };
 
@@ -2937,9 +2958,80 @@ const REQS = [{
   quote: "Switzerland is a high-price market and Germany lower — the price calculator has to handle each division.",
   need: "With all markets in one system, each sales division/market uses its own price calculator (e.g. high Swiss vs lower German rates), configurable at customer / company / project level.",
   impl: "Planned — market-scoped pricing configuration resolved per customer/company/project."
+}, /* ===== From M8 · Sales Deep Dive 8 (offer-builder feedback + guided workflow) ===== */
+{
+  id: "REQ-70",
+  title: "Guided Translation Project workflow (one list, no separate tabs)",
+  cat: "Architecture",
+  screen: "orders",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "Not offer builder, offers and translation orders — we have only translation projects; you click one and go into the step it's in, always guided.",
+  need: "Replace separate Offer Builder / Offers / Translation Orders tabs with a single Translation Projects list; clicking a project enters a guided workflow whose view adapts to the current stage. Filter by open in order-entry vs open in fulfilment.",
+  impl: "Planned — a guided project workflow (TDS-5 style) replacing the three separate tabs; prototype currently keeps them separate for demonstration."
+}, {
+  id: "REQ-71",
+  title: "Two-step offer flow (review → offer)",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "Do it on two pages: first the order data and files, volume and CAT analysis; then you go to the offer step with prices, discounting and add-ons.",
+  need: "Split the offer builder into two steps — (1) order data + files/volume/CAT review, (2) the offer step (per-language prices, discount, add-ons, alternate offers) — reached via a 'go to next step' button, rather than one long scrolling page.",
+  impl: "Planned — the single-page Offer Builder becomes a two-step flow (review → offer)."
+}, {
+  id: "REQ-72",
+  title: "Consolidated, editable order header",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "All the translation-project data should be in one box that belongs together, and I can change things — customer, then the company, product changeable, delivery mode and deadline, specialization.",
+  need: "Group all project data into one homogeneous, editable overview box: customer → auto company, customer/company/project as one block, Product as a changeable dropdown, delivery mode + concrete deadline, specialization; remove the duplicated language-pair display.",
+  impl: "Mock — the Offer Builder header exists but needs consolidating into one editable box with product dropdown and de-duplicated languages."
+}, {
+  id: "REQ-73",
+  title: "Single files · volume · CAT table (per language pair)",
+  cat: "Files",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "One table with the files and the volumes and the CAT amounts, a column per language pair with the CAT percentage, and a total row below.",
+  need: "Merge the files list and CAT analysis into one table (not two): each source file with its counted volume and CAT match, a column per language pair, and a totals row at the bottom.",
+  impl: "Mock — Files and CAT are currently two separate tables; to be merged with per-language-pair columns and a totals row."
+}, {
+  id: "REQ-74",
+  title: "Show price per language combination + clear total",
+  cat: "Pricing",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Dagna Jurk",
+  quote: "You cannot see if the €1,000 is for one language or for three — you need the price per language and then the total.",
+  need: "Show the price for each language combination (as an order line) with the total = the offer price, so it's never ambiguous whether a figure is per-language or the whole offer.",
+  impl: "Mock — the per-target table exists; add a price-per-language column and a total that equals the offer price."
+}, {
+  id: "REQ-75",
+  title: "Alternate offers: project-level & collapsible",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Dagna Jurk",
+  quote: "Alternate offers are for all languages, and not every order needs them — make it one line you can open, not in your face.",
+  need: "Alternate offers apply to the whole translation project (all languages), and should be collapsed by default (a single expandable line) since many orders have none.",
+  impl: "Mock — alternate offers exist as always-visible rows; make them project-level and collapsible."
+}, {
+  id: "REQ-76",
+  title: "Post-send acknowledgement tracking",
+  cat: "Offers",
+  screen: "offers",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "After sending, you see the list of sent-out offers waiting for the acknowledgement, and can say okay, I got the acknowledgement.",
+  need: "After an offer is sent, a step shows offers awaiting acknowledgement with reminders, and lets the operator record that the acknowledgement was received.",
+  impl: "Planned — an 'awaiting acknowledgement' state on the Offers step with a mark-received action (complements the reminders in REQ-64)."
 }];
 const CATS = ["Projects", "Offers", "Pricing", "Comments", "Channels", "Workflow", "Architecture", "Files", "Invoicing"];
-const STATUS_OF = r => ["REQ-06", "REQ-18", "REQ-45", "REQ-51", "REQ-52", "REQ-53", "REQ-54", "REQ-55", "REQ-56", "REQ-58", "REQ-59", "REQ-60", "REQ-61", "REQ-62", "REQ-63", "REQ-64", "REQ-66", "REQ-67", "REQ-68", "REQ-69"].includes(r.id) ? "Planned" : ["REQ-16", "REQ-27", "REQ-28", "REQ-25", "REQ-31", "REQ-33", "REQ-35", "REQ-36", "REQ-37", "REQ-38", "REQ-40", "REQ-42", "REQ-43", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-57", "REQ-65"].includes(r.id) ? "Mock / partial" : "Built (mock)";
+const STATUS_OF = r => ["REQ-06", "REQ-18", "REQ-45", "REQ-51", "REQ-52", "REQ-53", "REQ-54", "REQ-55", "REQ-56", "REQ-58", "REQ-59", "REQ-60", "REQ-61", "REQ-62", "REQ-63", "REQ-64", "REQ-66", "REQ-67", "REQ-68", "REQ-69", "REQ-70", "REQ-71", "REQ-76"].includes(r.id) ? "Planned" : ["REQ-16", "REQ-27", "REQ-28", "REQ-25", "REQ-31", "REQ-33", "REQ-35", "REQ-36", "REQ-37", "REQ-38", "REQ-40", "REQ-42", "REQ-43", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-57", "REQ-65", "REQ-72", "REQ-73", "REQ-74", "REQ-75"].includes(r.id) ? "Mock / partial" : "Built (mock)";
 const statusClass = st => st === "Built (mock)" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : st === "Planned" ? "bg-zinc-100 text-zinc-500 border-zinc-200" : st === "Dropped" ? "bg-zinc-100 text-zinc-400 border-zinc-200 line-through" : "bg-amber-50 text-amber-700 border-amber-200";
 const imgFor = id => (typeof window !== "undefined" && window.REQ_IMAGES || {})[id];
 
@@ -3126,22 +3218,22 @@ const EPICS = [{
   key: "intake",
   title: "1 · Order intake & entry",
   desc: "Creating and listing standalone translation orders, and starting an offer from a client + language pairs.",
-  ids: ["REQ-01", "REQ-02", "REQ-04", "REQ-29", "REQ-52", "REQ-55"]
+  ids: ["REQ-01", "REQ-02", "REQ-04", "REQ-29", "REQ-52", "REQ-55", "REQ-72"]
 }, {
   key: "quoting",
   title: "2 · Quoting & offers",
   desc: "Building offers with alternates and delivery options, and the accept-to-order lifecycle across channels.",
-  ids: ["REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-23", "REQ-53", "REQ-64", "REQ-65"]
+  ids: ["REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-23", "REQ-53", "REQ-64", "REQ-65", "REQ-71", "REQ-75", "REQ-76"]
 }, {
   key: "pricing",
   title: "3 · Pricing, discounts & margin",
   desc: "Rates, special/contract prices, discounts, add-ons and real-cost margin.",
-  ids: ["REQ-14", "REQ-15", "REQ-16", "REQ-17", "REQ-18", "REQ-39", "REQ-40", "REQ-54", "REQ-60", "REQ-62", "REQ-63", "REQ-66", "REQ-67", "REQ-68", "REQ-69"]
+  ids: ["REQ-14", "REQ-15", "REQ-16", "REQ-17", "REQ-18", "REQ-39", "REQ-40", "REQ-54", "REQ-60", "REQ-62", "REQ-63", "REQ-66", "REQ-67", "REQ-68", "REQ-69", "REQ-74"]
 }, {
   key: "analysis",
   title: "4 · Files, analysis & quality prep",
   desc: "Source formats, CAT analysis, counting, TM handling and XLIFF fixing before offering or handoff.",
-  ids: ["REQ-19", "REQ-27", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-36", "REQ-37", "REQ-38"]
+  ids: ["REQ-19", "REQ-27", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-36", "REQ-37", "REQ-38", "REQ-73"]
 }, {
   key: "projects",
   title: "5 · Projects, templates & instructions",
@@ -3156,7 +3248,7 @@ const EPICS = [{
   key: "platform",
   title: "7 · Platform & architecture",
   desc: "How order entry and fulfilment relate as modules and how data flows between them.",
-  ids: ["REQ-24", "REQ-35", "REQ-57"]
+  ids: ["REQ-24", "REQ-35", "REQ-57", "REQ-70"]
 }];
 const GROUP_OF = {};
 EPICS.forEach(e => e.ids.forEach(id => {
@@ -3234,7 +3326,14 @@ const STORIES = {
   "REQ-66": "As a sales operator, I want a security surcharge auto-added for confidential orders, so that the extra handling is always charged.",
   "REQ-67": "As a sales operator, I want add-ons split into customer-facing and internal, so that sales↔purchase invoicing items stay hidden from the customer.",
   "REQ-68": "As a sales operator, I want express/weekend/urgent surcharges applied (even on tender prices), so that rush work is priced correctly.",
-  "REQ-69": "As finance, I want each market/division to use its own price calculator, so that Swiss and German pricing can differ within one system."
+  "REQ-69": "As finance, I want each market/division to use its own price calculator, so that Swiss and German pricing can differ within one system.",
+  "REQ-70": "As a sales operator, I want one guided Translation Project workflow instead of separate offer/order tabs, so that I'm always shown the right step for where the project is.",
+  "REQ-71": "As a sales operator, I want the offer split into a review step and an offer step, so that I prepare the order first and price it second without one overloaded page.",
+  "REQ-72": "As a sales operator, I want all order data in one editable header box, so that I can see and change customer, company, project, product, delivery and specialization at a glance.",
+  "REQ-73": "As a sales operator, I want files, volume and CAT in one table with a column per language pair and a totals row, so that I can read the analysis at a glance.",
+  "REQ-74": "As a sales operator, I want the price shown per language combination plus a clear total, so that neither I nor the customer is confused about what a figure covers.",
+  "REQ-75": "As a sales operator, I want alternate offers to be project-level and collapsed by default, so that the screen stays simple when there are none.",
+  "REQ-76": "As a sales operator, I want to track sent offers awaiting acknowledgement and mark them received, so that nothing is forgotten after sending."
 };
 const storyOf = id => STORIES[id] || "";
 
@@ -3246,7 +3345,8 @@ const MEETING_URLS = {
   M4: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%204%2D20260818%5F143201%2DMeeting%20Recording%2Emp4",
   M5: "https://dtolk-my.sharepoint.com/personal/taha_tariq_digitaltolk_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Ftaha%5Ftariq%5Fdigitaltolk%5Fcom%2FDocuments%2FInspelningar%2FSales%20req%20demo%2D20260821%5F200653%2DMeeting%20Recording%2Emp4",
   M6: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20dive%205%2D20260820%5F123458%2DMeeting%20Recording%2Emp4",
-  M7: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%206%2D20260821%5F181804%2DMeeting%20Recording%2Emp4"
+  M7: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%206%2D20260821%5F181804%2DMeeting%20Recording%2Emp4",
+  M8: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%208%2D20260825%5F101011%2DBesprechungsaufzeichnung%2Emp4"
 };
 const REQ_TS = {
   "REQ-01": 1044,
@@ -3317,7 +3417,14 @@ const REQ_TS = {
   "REQ-66": 2233,
   "REQ-67": 2483,
   "REQ-68": 2809,
-  "REQ-69": 3247
+  "REQ-69": 3247,
+  "REQ-70": 1344,
+  "REQ-71": 810,
+  "REQ-72": 155,
+  "REQ-73": 316,
+  "REQ-74": 533,
+  "REQ-75": 761,
+  "REQ-76": 1170
 };
 /* ---- Existing requirements that were revisited in later meetings ---- */
 const ALSO_IN = {
@@ -3327,26 +3434,45 @@ const ALSO_IN = {
   }, {
     m: "M6",
     sec: 2561
+  }, {
+    m: "M8",
+    sec: 97
   }],
   "REQ-02": [{
     m: "M5",
     sec: 754
+  }, {
+    m: "M8",
+    sec: 941
   }],
   "REQ-05": [{
     m: "M5",
     sec: 2087
   }],
+  "REQ-07": [{
+    m: "M8",
+    sec: 620
+  }],
   "REQ-08": [{
     m: "M5",
     sec: 1168
+  }, {
+    m: "M8",
+    sec: 761
   }],
   "REQ-11": [{
     m: "M7",
     sec: 1347
+  }, {
+    m: "M8",
+    sec: 972
   }],
   "REQ-13": [{
     m: "M5",
     sec: 1294
+  }, {
+    m: "M8",
+    sec: 232
   }],
   "REQ-16": [{
     m: "M5",
@@ -3363,6 +3489,9 @@ const ALSO_IN = {
   "REQ-19": [{
     m: "M5",
     sec: 1645
+  }, {
+    m: "M8",
+    sec: 316
   }],
   "REQ-20": [{
     m: "M5",
@@ -3374,6 +3503,9 @@ const ALSO_IN = {
   }, {
     m: "M6",
     sec: 863
+  }, {
+    m: "M8",
+    sec: 1014
   }],
   "REQ-26": [{
     m: "M5",
@@ -3402,6 +3534,10 @@ const ALSO_IN = {
   "REQ-50": [{
     m: "M6",
     sec: 1347
+  }],
+  "REQ-64": [{
+    m: "M8",
+    sec: 1170
   }]
 };
 const alsoIn = id => ALSO_IN[id] || [];
@@ -6925,7 +7061,7 @@ const DOC_SECTIONS = [{
   }, {
     id: "FR-OE-002",
     t: "Create Sales Case capturing the full request",
-    maps: ["REQ-01", "REQ-29"],
+    maps: ["REQ-01", "REQ-29", "REQ-72"],
     s: "partial"
   }, {
     id: "FR-OE-003",
@@ -7065,17 +7201,17 @@ const DOC_SECTIONS = [{
   }, {
     id: "FR-OF-002",
     t: "Multiple alternative offers",
-    maps: ["REQ-08", "REQ-53", "REQ-09"],
+    maps: ["REQ-08", "REQ-53", "REQ-09", "REQ-75"],
     s: "covered"
   }, {
     id: "FR-OF-003",
     t: "Offer calculation (positions, volumes, discounts, add-ons, taxes, total)",
-    maps: ["REQ-08", "REQ-14", "REQ-15", "REQ-62"],
+    maps: ["REQ-08", "REQ-14", "REQ-15", "REQ-62", "REQ-71", "REQ-74"],
     s: "partial"
   }, {
     id: "FR-OF-004",
     t: "Offer sending / publishing",
-    maps: ["REQ-08", "REQ-11", "REQ-65"],
+    maps: ["REQ-08", "REQ-11", "REQ-65", "REQ-76"],
     s: "covered"
   }, {
     id: "FR-OF-005",
@@ -7225,7 +7361,7 @@ const DOC_SECTIONS = [{
   }, {
     id: "FR-CAT-007",
     t: "CAT transparency (raw / discount / billable / supplier)",
-    maps: ["REQ-35", "REQ-34"],
+    maps: ["REQ-35", "REQ-34", "REQ-73"],
     s: "partial"
   }]
 }, {
@@ -7648,9 +7784,14 @@ const DOC_SECTIONS = [{
   epic: "EPIC-17",
   title: "6. UI / Administration (selected)",
   items: [{
+    id: "UI-001",
+    t: "Unified operator workspace (guided, no system-switching)",
+    maps: ["REQ-70", "REQ-71"],
+    s: "partial"
+  }, {
     id: "UI-002",
     t: "Translation Project view (aggregated)",
-    maps: ["REQ-01", "REQ-02"],
+    maps: ["REQ-01", "REQ-02", "REQ-70"],
     s: "covered"
   }, {
     id: "UI-003",
@@ -7670,7 +7811,7 @@ const DOC_SECTIONS = [{
   }, {
     id: "UI-007",
     t: "Document analysis view (format, volume, CAT, validation)",
-    maps: ["REQ-32", "REQ-34", "REQ-37"],
+    maps: ["REQ-32", "REQ-34", "REQ-37", "REQ-73"],
     s: "partial"
   }, {
     id: "UI-014",
