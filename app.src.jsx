@@ -721,6 +721,7 @@ const SALES_NAV = [
   {key:"files", label:"Files & Analysis", icon:"file"},
   {key:"invoicing", label:"Invoicing & Pricing", icon:"receipt"},
   {key:"requirements", label:"Requirements", icon:"list"},
+  {key:"coverage", label:"Spec coverage", icon:"check"},
 ];
 function Icon({name, className}){
   const p={width:16,height:16,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round",className};
@@ -734,6 +735,7 @@ function Icon({name, className}){
     file:<React.Fragment><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></React.Fragment>,
     receipt:<React.Fragment><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></React.Fragment>,
     list:<React.Fragment><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></React.Fragment>,
+    check:<React.Fragment><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></React.Fragment>,
   };
   return <svg {...p}>{paths[name]}</svg>;
 }
@@ -2338,6 +2340,320 @@ function OfferDetailDrawer({offer, open, onClose, onBack, setRoute}){
 }
 
 /* ============================ APP ============================ */
+/* ============================ SPEC COVERAGE ============================
+   Two-way mapping between Clemens's "Consolidated TMS Order Entry Requirements"
+   (FR-/UI-/INT- items) and the requirements gathered in the meetings (REQ-xx).
+   s = coverage of the spec item by the mockup: covered | partial | pending.   */
+const DOC_SECTIONS = [
+  {key:"OE", epic:"EPIC-01", title:"1.1 Order Entry & Sales Case", items:[
+    {id:"FR-OE-001", t:"Multi-channel order entry (portal, API, Ariba, Beebox, operator, email…)", maps:["REQ-23","REQ-52","REQ-55"], s:"partial"},
+    {id:"FR-OE-002", t:"Create Sales Case capturing the full request", maps:["REQ-01","REQ-29"], s:"partial"},
+    {id:"FR-OE-003", t:"New customer / company / department handling", maps:[], s:"pending"},
+    {id:"FR-OE-004", t:"Multi-language request (1 source → many targets)", maps:["REQ-01"], s:"covered"},
+    {id:"FR-OE-005", t:"Additional services (OCR, apostille, certified, DTP, high-security…)", maps:["REQ-17","REQ-38","REQ-66","REQ-67"], s:"partial"},
+    {id:"FR-OE-006", t:"Reference resources (TM, glossaries, style guides, instructions)", maps:["REQ-05"], s:"covered"},
+    {id:"FR-OE-007", t:"Operator review & correct incoming request", maps:["REQ-53","REQ-54","REQ-59"], s:"partial"},
+    {id:"FR-OE-008", t:"Reject / return for clarification", maps:[], s:"pending"},
+  ]},
+  {key:"PD", epic:"EPIC-06", title:"1.2 Product, Delivery & Scheduling", items:[
+    {id:"FR-PD-001", t:"Configurable product model", maps:["REQ-27"], s:"partial"},
+    {id:"FR-PD-002", t:"Delivery modes (express / 24h / 48h / 3–5d / custom)", maps:["REQ-10","REQ-68"], s:"covered"},
+    {id:"FR-PD-003", t:"Customer delivery deadline distinct from mode", maps:["REQ-13"], s:"covered"},
+    {id:"FR-PD-004", t:"Operator deadline override", maps:["REQ-13"], s:"partial"},
+    {id:"FR-PD-005", t:"Internal delivery buffer", maps:["REQ-26"], s:"covered"},
+    {id:"FR-PD-006", t:"Delivery feasibility check", maps:["REQ-10","REQ-13"], s:"covered"},
+  ]},
+  {key:"CP", epic:"EPIC-03", title:"1.3 Customer Project / Workspace", items:[
+    {id:"FR-CP-001", t:"Reusable customer project / workspace", maps:["REQ-56","REQ-03"], s:"covered"},
+    {id:"FR-CP-002", t:"Project configuration (pricing, CAT, TM, workflow, delivery, invoice…)", maps:["REQ-05","REQ-28"], s:"partial"},
+    {id:"FR-CP-003", t:"Customer project selection at order entry", maps:["REQ-04"], s:"covered"},
+    {id:"FR-CP-004", t:"Operator project assignment / change", maps:["REQ-04"], s:"partial"},
+    {id:"FR-CP-005", t:"Project creation & resource maintenance", maps:["REQ-05"], s:"partial"},
+    {id:"FR-CP-006", t:"Project inheritance (defaults → overrides)", maps:["REQ-04","REQ-17"], s:"partial"},
+    {id:"FR-CP-007", t:"Language-specific configuration", maps:["REQ-20"], s:"partial"},
+    {id:"FR-CP-008", t:"Structured operational knowledge (comments → config)", maps:["REQ-20","REQ-21","REQ-22"], s:"partial"},
+  ]},
+  {key:"TP", epic:"EPIC-04", title:"1.4 Translation Project & Offers", items:[
+    {id:"FR-TP-001", t:"Translation Project as commercial object", maps:["REQ-01"], s:"covered"},
+    {id:"FR-TP-002", t:"One project → multiple fulfilment orders", maps:["REQ-01","REQ-57"], s:"covered"},
+    {id:"FR-TP-003", t:"Project-level commercial view (aggregate)", maps:["REQ-01","REQ-07"], s:"covered"},
+    {id:"FR-OF-001", t:"Offer belongs to the Translation Project", maps:["REQ-07"], s:"covered"},
+    {id:"FR-OF-002", t:"Multiple alternative offers", maps:["REQ-08","REQ-53","REQ-09"], s:"covered"},
+    {id:"FR-OF-003", t:"Offer calculation (positions, volumes, discounts, add-ons, taxes, total)", maps:["REQ-08","REQ-14","REQ-15","REQ-62"], s:"partial"},
+    {id:"FR-OF-004", t:"Offer sending / publishing", maps:["REQ-08","REQ-11","REQ-65"], s:"covered"},
+    {id:"FR-OF-005", t:"Offer status & history (draft/sent/accepted/rejected/expired)", maps:["REQ-11"], s:"covered"},
+    {id:"FR-OF-006", t:"Offer acceptance", maps:["REQ-12"], s:"covered"},
+    {id:"FR-OF-007", t:"Accept one alternative → commercial commitment", maps:["REQ-08","REQ-12"], s:"covered"},
+    {id:"FR-OF-008", t:"Manual (out-of-band) acceptance", maps:["REQ-12"], s:"partial"},
+    {id:"FR-OF-009", t:"Recalculate delivery feasibility after acceptance", maps:["REQ-13"], s:"partial"},
+    {id:"FR-OF-010", t:"Transition to fulfilment after acceptance", maps:["REQ-24","REQ-11"], s:"covered"},
+  ]},
+  {key:"DOC", epic:"EPIC-07", title:"1.5 Document Handling & XLIFF", items:[
+    {id:"FR-DOC-001", t:"Supported source formats", maps:["REQ-30"], s:"covered"},
+    {id:"FR-DOC-002", t:"Multiple source documents", maps:["REQ-30"], s:"partial"},
+    {id:"FR-DOC-003", t:"Virus / security scan on upload", maps:[], s:"pending"},
+    {id:"FR-DOC-004", t:"Unsupported file handling (reject / manual)", maps:["REQ-30"], s:"partial"},
+    {id:"FR-DOC-005", t:"Standard processing pipeline (extract → volume → CAT)", maps:["REQ-31","REQ-32","REQ-34"], s:"partial"},
+    {id:"FR-DOC-006", t:"XML / ITS support", maps:["REQ-31"], s:"covered"},
+    {id:"FR-DOC-007", t:"Automatic ITS association", maps:["REQ-31"], s:"partial"},
+    {id:"FR-DOC-008", t:"Manual ITS assignment & re-extract", maps:["REQ-31"], s:"partial"},
+    {id:"FR-DOC-009", t:"XLIFF extraction", maps:["REQ-31","REQ-37"], s:"partial"},
+    {id:"FR-DOC-010", t:"Volume analysis (words / lines / characters)", maps:["REQ-32"], s:"covered"},
+    {id:"FR-DOC-011", t:"Manual volume adjustment (auditable)", maps:["REQ-36"], s:"partial"},
+    {id:"FR-DOC-012", t:"XLIFF validation (error/warning/info)", maps:["REQ-37"], s:"covered"},
+    {id:"FR-DOC-013", t:"Validation details (doc, severity, type…)", maps:["REQ-37"], s:"covered"},
+    {id:"FR-DOC-014", t:"Source correction & reprocessing", maps:["REQ-36","REQ-37"], s:"partial"},
+    {id:"FR-DOC-015", t:"Quote-readiness states", maps:[], s:"pending"},
+  ]},
+  {key:"CAT", epic:"EPIC-08", title:"1.6 CAT Analysis & Volume", items:[
+    {id:"FR-CAT-001", t:"CAT analysis (reps / 100% / fuzzy / new)", maps:["REQ-19","REQ-34"], s:"covered"},
+    {id:"FR-CAT-002", t:"Customer CAT discount rules", maps:["REQ-34"], s:"covered"},
+    {id:"FR-CAT-003", t:"Order-level CAT override", maps:["REQ-34"], s:"partial"},
+    {id:"FR-CAT-004", t:"Customer billable volume ≠ raw volume", maps:["REQ-35","REQ-32"], s:"partial"},
+    {id:"FR-CAT-005", t:"Supplier work volume ≠ billable volume", maps:["REQ-35"], s:"partial"},
+    {id:"FR-CAT-006", t:"Lock CAT matches (100%)", maps:["REQ-36"], s:"covered"},
+    {id:"FR-CAT-007", t:"CAT transparency (raw / discount / billable / supplier)", maps:["REQ-35","REQ-34"], s:"partial"},
+  ]},
+  {key:"PR", epic:"EPIC-09", title:"1.7 Pricing & Special Pricing", items:[
+    {id:"FR-PR-001", t:"Central pricing service", maps:["REQ-62","REQ-18"], s:"partial"},
+    {id:"FR-PR-002", t:"Price agreements", maps:["REQ-18","REQ-39"], s:"partial"},
+    {id:"FR-PR-003", t:"Price rules (product × langs × unit × mode × …)", maps:["REQ-39"], s:"partial"},
+    {id:"FR-PR-004", t:"Customer-specific pricing applied automatically", maps:["REQ-18","REQ-39"], s:"covered"},
+    {id:"FR-PR-005", t:"Project-specific pricing overrides defaults", maps:["REQ-04","REQ-39"], s:"partial"},
+    {id:"FR-PR-006", t:"Wildcard pricing (DE→ANY, ANY→ANY)", maps:["REQ-40"], s:"covered"},
+    {id:"FR-PR-007", t:"Deterministic rule precedence", maps:[], s:"pending"},
+    {id:"FR-PR-008", t:"Bulk price maintenance (import / mass change)", maps:["REQ-40"], s:"covered"},
+    {id:"FR-PR-009", t:"Flexible billing units (word/line/char/page/hour/item)", maps:["REQ-39","REQ-50","REQ-32"], s:"partial"},
+    {id:"FR-PR-010", t:"Billing unit matches the price rule", maps:["REQ-39"], s:"partial"},
+    {id:"FR-PR-011", t:"Price freeze / snapshot on commitment", maps:[], s:"pending"},
+    {id:"FR-PR-012", t:"Product / pricing groups", maps:[], s:"pending"},
+    {id:"FR-PR-013", t:"Minimum price", maps:["REQ-15","REQ-17"], s:"partial"},
+    {id:"FR-PR-014", t:"Discounts (configurable & manual)", maps:["REQ-14","REQ-63"], s:"covered"},
+    {id:"FR-PR-015", t:"Planned additional costs in preliminary price", maps:["REQ-17","REQ-58"], s:"partial"},
+    {id:"FR-PR-016", t:"Unknown additional costs (until fulfilment)", maps:["REQ-58"], s:"covered"},
+    {id:"FR-PR-017", t:"Unexpected additional costs during fulfilment", maps:["REQ-58","REQ-59"], s:"partial"},
+  ]},
+  {key:"FP", epic:"EPIC-10", title:"1.8 Fixed / Time-based / Final Pricing", items:[
+    {id:"FR-FP-001", t:"Fixed-price orders → auto invoice", maps:["REQ-49"], s:"covered"},
+    {id:"FR-FP-002", t:"Time-based orders (price from actuals)", maps:["REQ-50"], s:"covered"},
+    {id:"FR-FP-003", t:"Separate supplier cost & customer charge", maps:["REQ-16","REQ-35"], s:"covered"},
+    {id:"FR-FP-004", t:"Time-based billing rules (hourly, min, increments…)", maps:["REQ-50","REQ-60"], s:"partial"},
+    {id:"FR-FP-005", t:"Actual supplier time available to pricing", maps:["REQ-59"], s:"covered"},
+    {id:"FR-FP-006", t:"Customer billable time ≠ supplier time", maps:["REQ-59"], s:"partial"},
+    {id:"FR-FP-007", t:"Manual final-price adjustment", maps:["REQ-58","REQ-54","REQ-59"], s:"covered"},
+    {id:"FR-FP-008", t:"Multi-language price harmonization", maps:[], s:"pending"},
+    {id:"FR-FP-009", t:"Final price review before invoicing", maps:["REQ-58","REQ-61"], s:"covered"},
+    {id:"FR-FP-010", t:"Project-level final price review", maps:["REQ-58"], s:"partial"},
+    {id:"FR-FP-011", t:"Price lifecycle states", maps:[], s:"pending"},
+  ]},
+  {key:"AC", epic:"EPIC-11", title:"1.9 Accounting & Billing", items:[
+    {id:"FR-AC-001", t:"Multiple accountings per company", maps:["REQ-41"], s:"covered"},
+    {id:"FR-AC-002", t:"Accounting data (address, VAT, terms, profile, recipients…)", maps:["REQ-41","REQ-42","REQ-44","REQ-45","REQ-48"], s:"covered"},
+    {id:"FR-AC-003", t:"Organizational assignment of accountings", maps:["REQ-41"], s:"partial"},
+    {id:"FR-AC-004", t:"Accounting selection at order entry", maps:["REQ-41"], s:"partial"},
+    {id:"FR-AC-005", t:"Accounting portal visibility", maps:[], s:"pending"},
+    {id:"FR-AC-006", t:"VAT / tax handling (domestic / EU / non-EU)", maps:["REQ-42"], s:"covered"},
+    {id:"FR-AC-007", t:"Payment terms (customer-specific)", maps:["REQ-44"], s:"covered"},
+    {id:"FR-AC-008", t:"Payment modes + default", maps:["REQ-44"], s:"covered"},
+    {id:"FR-AC-009", t:"Invoice profiles (structured e-invoice)", maps:["REQ-45"], s:"covered"},
+    {id:"FR-AC-010", t:"Master / framework agreement (quote vs direct)", maps:["REQ-43"], s:"covered"},
+    {id:"FR-AC-011", t:"Order-level override of master agreement", maps:["REQ-43"], s:"partial"},
+  ]},
+  {key:"IV", epic:"EPIC-12", title:"1.10 Invoice Fields & Invoicing", items:[
+    {id:"FR-IV-001", t:"Customer-specific invoice fields (PO, cost centre…)", maps:["REQ-47"], s:"covered"},
+    {id:"FR-IV-002", t:"Invoice field properties (type, required, default…)", maps:["REQ-47"], s:"partial"},
+    {id:"FR-IV-003", t:"Mandatory fields block invoice readiness", maps:["REQ-47","REQ-61"], s:"partial"},
+    {id:"FR-IV-004", t:"One or multiple invoice recipients", maps:["REQ-48"], s:"covered"},
+    {id:"FR-IV-005", t:"Accounting-specific recipients", maps:["REQ-48"], s:"covered"},
+    {id:"FR-IV-006", t:"Single invoice per order/project", maps:["REQ-46"], s:"covered"},
+    {id:"FR-IV-007", t:"Collective invoicing", maps:["REQ-46"], s:"covered"},
+    {id:"FR-IV-008", t:"Invoice grouping (company/person/project/field)", maps:["REQ-47"], s:"covered"},
+    {id:"FR-IV-009", t:"Invoice timing (on delivery / delayed / EOM)", maps:["REQ-49","REQ-46"], s:"partial"},
+    {id:"FR-IV-010", t:"Project-level invoice as one unit", maps:["REQ-46","REQ-58"], s:"covered"},
+    {id:"FR-IV-011", t:"Invoice readiness validation", maps:["REQ-61"], s:"covered"},
+    {id:"FR-IV-012", t:"Automatic invoice generation", maps:["REQ-49"], s:"covered"},
+    {id:"FR-IV-013", t:"Variable-price invoice blocking", maps:["REQ-61","REQ-58"], s:"partial"},
+    {id:"FR-IV-014", t:"Change accounting before invoice", maps:[], s:"pending"},
+    {id:"FR-IV-015", t:"Invoice correction (cancel / credit / reissue)", maps:["REQ-49"], s:"covered"},
+  ]},
+  {key:"DL", epic:"EPIC-13", title:"1.11 Delivery & Partial Delivery", items:[
+    {id:"FR-DL-001", t:"Delivery & invoicing as separate events", maps:["REQ-49","REQ-24"], s:"partial"},
+    {id:"FR-DL-002", t:"Partial delivery of a project", maps:["REQ-01"], s:"partial"},
+    {id:"FR-DL-003", t:"Final delivery detection", maps:["REQ-58"], s:"partial"},
+    {id:"FR-DL-004", t:"Delivery preconditions / blocking", maps:["REQ-61","REQ-25"], s:"partial"},
+  ]},
+  {key:"SEC", epic:"EPIC-15/16", title:"1.12 Secure / Swiss Workflows", items:[
+    {id:"FR-SEC-001", t:"Security classification (STANDARD / C-Light / C&D)", maps:["REQ-66"], s:"partial"},
+    {id:"FR-SEC-002", t:"Security policy (storage, access, supplier, MT, routing)", maps:[], s:"pending"},
+    {id:"FR-SEC-003", t:"Secure document storage (encryption, key mgmt)", maps:[], s:"pending"},
+    {id:"FR-SEC-004", t:"No local download for secure files", maps:[], s:"pending"},
+    {id:"FR-SEC-005", t:"Secure document reference (no dummy files)", maps:[], s:"pending"},
+    {id:"FR-SEC-006", t:"MFA for secure orders", maps:[], s:"pending"},
+    {id:"FR-SEC-007", t:"Least-privilege access", maps:[], s:"pending"},
+    {id:"FR-SEC-008", t:"Security operator role", maps:[], s:"pending"},
+    {id:"FR-SEC-009", t:"Supplier security qualification", maps:[], s:"pending"},
+    {id:"FR-SEC-010", t:"Secure supplier assignment only", maps:[], s:"pending"},
+    {id:"FR-SEC-011", t:"Named-supplier quote + compliance steps", maps:[], s:"pending"},
+    {id:"FR-SEC-012", t:"Secure tool restrictions (no external MT)", maps:[], s:"pending"},
+    {id:"FR-SEC-013", t:"Secure translation memories", maps:[], s:"pending"},
+    {id:"FR-SEC-014", t:"Secure XLIFF processing chain", maps:[], s:"pending"},
+    {id:"FR-SEC-015", t:"Secure translation environment (Freddy)", maps:[], s:"pending"},
+    {id:"FR-SEC-016", t:"Secure layout / preview", maps:["REQ-38"], s:"pending"},
+    {id:"FR-SEC-017", t:"Swiss MT workflow", maps:[], s:"pending"},
+    {id:"FR-SEC-018", t:"Multi-currency (CHF / EUR / USD)", maps:["REQ-42","REQ-69"], s:"partial"},
+    {id:"FR-SEC-019", t:"Exchange rates (validity + source)", maps:[], s:"pending"},
+  ]},
+  {key:"UI", epic:"EPIC-17", title:"6. UI / Administration (selected)", items:[
+    {id:"UI-002", t:"Translation Project view (aggregated)", maps:["REQ-01","REQ-02"], s:"covered"},
+    {id:"UI-003", t:"Operational order view (workflow, suppliers)", maps:["REQ-02","REQ-57"], s:"partial"},
+    {id:"UI-005", t:"Special pricing administration (search / bulk)", maps:["REQ-40"], s:"partial"},
+    {id:"UI-006", t:"Pricing explainability (which rule applied)", maps:["REQ-62"], s:"pending"},
+    {id:"UI-007", t:"Document analysis view (format, volume, CAT, validation)", maps:["REQ-32","REQ-34","REQ-37"], s:"partial"},
+    {id:"UI-014", t:"Final price review UI (supplier vs customer split)", maps:["REQ-58","REQ-59"], s:"partial"},
+  ]},
+  {key:"INT", epic:"EPIC-18", title:"7. Integrations (selected)", items:[
+    {id:"INT-004", t:"Sales → Order Fulfilment data transfer", maps:["REQ-24","REQ-57"], s:"partial"},
+    {id:"INT-005", t:"Supplier / purchase data into final pricing", maps:["REQ-59"], s:"partial"},
+    {id:"INT-006", t:"Atlas (financial / payment / invoicing)", maps:["REQ-51","REQ-16"], s:"partial"},
+    {id:"INT-007", t:"Customer portal consumes order-entry", maps:["REQ-23","REQ-55"], s:"partial"},
+  ]},
+];
+/* Mockup requirements with no spec item — flagged in the reverse view.
+   Note explains where (if anywhere) the topic appears in the document. */
+const MOCKUP_ONLY_NOTES = {
+  "REQ-06":"Naming ‘Project vs Template’ is an open question in the spec (OQ-001), not a firm requirement.",
+  "REQ-33":"Format-surcharge transparency is only an open question in the spec (OQ-006 / OQ-007).",
+  "REQ-64":"Follow-up reminders (date + order-status) have no equivalent in the consolidated spec.",
+};
+const DOC_ALL = DOC_SECTIONS.flatMap(s=>s.items);
+const DOC_REVERSE = (()=>{ const m={}; DOC_ALL.forEach(it=>it.maps.forEach(r=>{(m[r]=m[r]||[]).push(it.id);})); return m; })();
+const covClass=(s)=> s==="covered" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+  : s==="partial" ? "bg-amber-50 text-amber-700 border-amber-200"
+  : "bg-rose-50 text-rose-700 border-rose-200";
+const covLabel=(s)=> s==="covered" ? "Covered" : s==="partial" ? "Partial" : "Not yet (pending)";
+
+function Coverage({openDoc}){
+  const [dir,setDir]=useState("doc"); // doc = spec→mockup, req = mockup→spec
+  const [filter,setFilter]=useState("all");
+  const counts = useMemo(()=>{ const c={covered:0,partial:0,pending:0}; DOC_ALL.forEach(i=>c[i.s]++); return c; },[]);
+  const total = DOC_ALL.length;
+  const reqIds = REQS.map(r=>r.id);
+  const mappedReqs = reqIds.filter(id=>DOC_REVERSE[id]&&DOC_REVERSE[id].length);
+  const onlyReqs = reqIds.filter(id=>!(DOC_REVERSE[id]&&DOC_REVERSE[id].length));
+  const pct=(n)=>Math.round(n/total*100);
+
+  const Chip=({id})=>{
+    const r=REQS.find(x=>x.id===id);
+    return <button onClick={()=>openDoc(id)} title={r?r.title:id}
+      className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[11px] font-mono text-zinc-600 hover:bg-zinc-900 hover:text-white hover:border-zinc-900">{id}</button>;
+  };
+
+  return (
+    <div className="p-6 space-y-5 fade-in">
+      <div>
+        <h1 className="text-xl font-bold">Spec coverage</h1>
+        <p className="text-sm text-zinc-500 max-w-3xl">Two-way mapping between Clemens's consolidated requirements spec and the {reqIds.length} requirements gathered in the meetings. Shows what the spec asks for and whether the mockup covers it — and, the other way, mockup requirements that aren't in the spec.</p>
+      </div>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4"><div className="text-xs text-zinc-500">Spec items mapped</div><div className="text-2xl font-bold">{total}</div><div className="text-[11px] text-zinc-400 mt-1">FR / UI items from the document</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">Covered</div><div className="text-2xl font-bold text-emerald-600">{counts.covered} <span className="text-sm font-normal text-zinc-400">· {pct(counts.covered)}%</span></div>
+          <div className="mt-2 h-1.5 rounded-full bg-zinc-100 overflow-hidden flex">
+            <div className="h-full bg-emerald-500" style={{width:pct(counts.covered)+"%"}}/><div className="h-full bg-amber-400" style={{width:pct(counts.partial)+"%"}}/><div className="h-full bg-rose-400" style={{width:pct(counts.pending)+"%"}}/>
+          </div>
+          <div className="text-[10px] text-zinc-400 mt-1">{counts.partial} partial · {counts.pending} pending</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">Mockup → spec</div><div className="text-2xl font-bold">{mappedReqs.length}<span className="text-sm font-normal text-zinc-400">/{reqIds.length}</span></div><div className="text-[11px] text-zinc-400 mt-1">mockup requirements that map to the spec</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">Mockup-only</div><div className="text-2xl font-bold text-blue-600">{onlyReqs.length}</div><div className="text-[11px] text-zinc-400 mt-1">in the mockup, not in the spec</div></Card>
+      </div>
+
+      {/* direction toggle */}
+      <div className="flex items-center gap-2">
+        <div className="flex rounded-lg border border-zinc-200 p-0.5 bg-white">
+          <button onClick={()=>setDir("doc")} className={cx("px-3 py-1 text-xs rounded-md", dir==="doc"?"bg-zinc-900 text-white":"text-zinc-600")}>Document → Mockup</button>
+          <button onClick={()=>setDir("req")} className={cx("px-3 py-1 text-xs rounded-md", dir==="req"?"bg-zinc-900 text-white":"text-zinc-600")}>Mockup → Document</button>
+        </div>
+        {dir==="doc" && (
+          <div className="flex items-center gap-1">
+            {[["all","All"],["covered","Covered"],["partial","Partial"],["pending","Pending"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setFilter(k)} className={cx("rounded-lg px-3 py-1.5 text-xs", filter===k?"bg-zinc-900 text-white":"text-zinc-600 hover:bg-zinc-100")}>{l}</button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {dir==="doc" ? (
+        <div className="space-y-6">
+          {DOC_SECTIONS.map(sec=>{
+            const rows=sec.items.filter(i=>filter==="all"||i.s===filter);
+            if(!rows.length) return null;
+            return (
+              <div key={sec.key}>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <h2 className="text-sm font-bold text-zinc-900">{sec.title}</h2>
+                  <span className="text-[11px] text-zinc-400">{sec.epic}</span>
+                </div>
+                <Card className="overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="text-left text-xs text-zinc-500 border-b border-zinc-200 bg-zinc-50/60">
+                      <tr><th className="px-4 py-2 font-medium w-28">Spec ID</th><th className="px-4 py-2 font-medium">Requirement</th><th className="px-4 py-2 font-medium w-40">Coverage</th><th className="px-4 py-2 font-medium">Mapped to</th></tr>
+                    </thead>
+                    <tbody>
+                      {rows.map(it=>(
+                        <tr key={it.id} className="border-b border-zinc-50 align-top">
+                          <td className="px-4 py-2.5 font-mono text-xs text-zinc-500">{it.id}</td>
+                          <td className="px-4 py-2.5 text-zinc-700">{it.t}</td>
+                          <td className="px-4 py-2.5"><Badge className={covClass(it.s)}>{covLabel(it.s)}</Badge></td>
+                          <td className="px-4 py-2.5">
+                            {it.maps.length ? <div className="flex flex-wrap gap-1">{it.maps.map(m=><Chip key={m} id={m}/>)}</div>
+                              : <span className="text-[11px] text-rose-500">— no mockup requirement yet</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3 text-xs text-blue-800">
+            <b>{onlyReqs.length} mockup requirements are not in the consolidated spec.</b> They came out of the meetings but aren't (yet) reflected in Clemens's document — worth raising so the spec and the build stay in sync.
+          </div>
+          <Card className="overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs text-zinc-500 border-b border-zinc-200 bg-zinc-50/60">
+                <tr><th className="px-4 py-2 font-medium w-24">Req</th><th className="px-4 py-2 font-medium">Mockup requirement</th><th className="px-4 py-2 font-medium">In the spec?</th></tr>
+              </thead>
+              <tbody>
+                {REQS.map(r=>{
+                  const docs=DOC_REVERSE[r.id]||[];
+                  const inSpec=docs.length>0;
+                  return (
+                    <tr key={r.id} className={cx("border-b border-zinc-50 align-top", !inSpec&&"bg-blue-50/30")}>
+                      <td className="px-4 py-2.5"><button onClick={()=>openDoc(r.id)} className="font-mono text-xs text-zinc-600 hover:underline">{r.id}</button></td>
+                      <td className="px-4 py-2.5 text-zinc-700">{r.title}
+                        {!inSpec && MOCKUP_ONLY_NOTES[r.id] && <div className="text-[11px] text-blue-600 mt-0.5">{MOCKUP_ONLY_NOTES[r.id]}</div>}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        {inSpec ? <div className="flex flex-wrap gap-1">{docs.map(d=><span key={d} className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-1.5 py-0.5 text-[11px] font-mono text-zinc-600">{d}</span>)}</div>
+                          : <Badge className="bg-blue-50 text-blue-700 border-blue-200">Not in spec</Badge>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Card>
+        </div>
+      )}
+      <div className="text-[11px] text-zinc-400">Coverage is an assessment of how far the clickable mockup demonstrates each spec item (Covered = shown end-to-end · Partial = partially shown / mocked · Pending = not built yet). Click any REQ to open its full detail.</div>
+    </div>
+  );
+}
+
 function App(){
   const [route,setRoute]=useState("dashboard");
   const [docReq,setDocReq]=useState(null);
@@ -2353,7 +2669,7 @@ function App(){
 
   const titles={dashboard:"Dashboard",orders:"Translation Orders",builder:"Offer Builder",
     offers:"Offers",templates:"Projects / Templates",comments:"Comments Library",
-    files:"Files & Analysis",invoicing:"Invoicing & Pricing",requirements:"Requirements"};
+    files:"Files & Analysis",invoicing:"Invoicing & Pricing",requirements:"Requirements",coverage:"Spec coverage"};
 
   let screen;
   if(route==="dashboard") screen=<Dashboard setRoute={setRoute} openDoc={openDoc}/>;
@@ -2364,6 +2680,7 @@ function App(){
   else if(route==="offers") screen=<Offers openDoc={openDoc}/>;
   else if(route==="templates") screen=<Templates openDoc={openDoc}/>;
   else if(route==="comments") screen=<Comments openDoc={openDoc}/>;
+  else if(route==="coverage") screen=<Coverage openDoc={openDoc}/>;
   else screen=<Requirements goFeature={goFeature} openDoc={openDoc}/>;
 
   return (
