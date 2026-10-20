@@ -451,6 +451,11 @@ const EPICS=[
 const GROUP_OF={}; EPICS.forEach(e=>e.ids.forEach(id=>{GROUP_OF[id]=e;}));
 const groupOf=(id)=>GROUP_OF[id];
 
+/* ============== CHRONOLOGICAL EPICS + ACCEPTANCE CRITERIA (Epics tab) ============== */
+const EPICS2=[{"key": "foundation", "num": "E1", "title": "Foundations — project model & customer hierarchy", "target": "Establish the core objects the whole order-entry module hangs off: the translation project (one source → many targets), the customer-project workspace above it, the link to the company hierarchy, and the references (TM, glossaries, style guides) a project carries. Nothing can be quoted, priced or invoiced correctly until these exist.", "plan": "Model the three-level hierarchy (Customer project → Translation project → Orders). Introduce the Translation Orders screen with a Project view / Order view toggle that replaces the old pooling. Bind projects to a company and its sub-hierarchy, attach per-project references, and lock the 'project' vs 'template' terminology before building UI on top.", "ids": ["REQ-01", "REQ-02", "REQ-56", "REQ-57", "REQ-03", "REQ-06", "REQ-05"]}, {"key": "projectcfg", "num": "E2", "title": "Project configuration — instructions, comments & workflow", "target": "Turn a bare project into reusable configuration: the delivery comments/instructions it carries per target language, how they are suggested and overridden, its priority/special-care handling, deadline buffers, TM-update behaviour and the workflow steps that auto-apply to fulfilment.", "plan": "Store delivery comments per project × language with an auto-match that suggests the best-fitting set for a new order; let the operator confirm, add, exclude or scope them. Add a priority flag that triggers special-care workflow, a customer-vs-purchase deadline buffer, per-company/project TM-update settings in the prep step, and reusable workflow templates attached to the project.", "ids": ["REQ-20", "REQ-21", "REQ-22", "REQ-25", "REQ-26", "REQ-27", "REQ-28"]}, {"key": "files", "num": "E3", "title": "Source files, analysis & quality prep", "target": "Get a trustworthy volume and match analysis before anything is quoted. Covers accepted source formats, XML/ITS handling, volume counting, CAT analysis and the clean-up (100%-match locking, XLIFF fixing, DTP) that precedes handoff — plus the finance rule that there is no inter-module CAT accounting.", "plan": "Enforce the supported-format list on upload and support XML+ITS (incl. via API). Count volume by words/lines/characters with format-based rates and run CAT analysis to produce billable volume and match discounts, with company-level CAT options. Add 100%-match locking/recount, XLIFF error surfacing with classification, and DTP for IDML/EDML. Keep margin transparent instead of booking CAT between modules.", "ids": ["REQ-19", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-35", "REQ-36", "REQ-37", "REQ-38"]}, {"key": "quoting", "num": "E4", "title": "Quoting — offers, alternates & the accept lifecycle", "target": "Everything the operator does to produce and send a quote: start an offer from a client + language pairs (or an email), build multi-language offers with sendable alternates, offer only realistic delivery modes, move offers through clear states, accept them and set the real deadline — across both the self-service portal and operator admin.", "plan": "Attach the offer to the translation project so one offer spans all target languages, with a multi-language visibility hint. Add alternate offers (product/delivery/price variants) each sent and tracked on its own, auto-filtered to realistic delivery modes. Seed drafts from inbound email and from default-offer rules the operator reviews. Drive a draft→sent→accepted lifecycle with link/portal acceptance, a deadline fit-check on accept, follow-up reminders and reusable offer-letter templates.", "ids": ["REQ-29", "REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-52", "REQ-53", "REQ-23", "REQ-64", "REQ-65"]}, {"key": "pricing", "num": "E5", "title": "Pricing, discounts, margin & surcharges", "target": "Make the number on the offer correct and defensible: rates and factor-based pricing, special/contract prices, automatic discounts, real-cost margin from Atlas, add-ons and the full surcharge set — with multi-market calculators so Swiss and German pricing can differ in one system.", "plan": "Compute price from language × specialization × delivery-mode factors, overlaid with special/contract prices keyed by pair/type/product/mode (wildcards + bulk import). Show live margin from real Atlas supplier costs and enforce the minimum. Auto-apply volume/loyalty/threshold discounts and allow a manual agreed-price override that still shows margin impact. Add security, express/weekend/urgent surcharges and internal-vs-customer add-ons, and route each market/division to its own calculator.", "ids": ["REQ-62", "REQ-14", "REQ-15", "REQ-16", "REQ-18", "REQ-39", "REQ-40", "REQ-63", "REQ-54", "REQ-17", "REQ-66", "REQ-67", "REQ-68", "REQ-60", "REQ-69"]}, {"key": "invoicing", "num": "E6", "title": "Invoicing & accounting", "target": "Bill accepted work correctly: accountings and billing entities at company/parent level, VAT/currency, payment terms, e-invoice profiles, single vs collective invoices with correct grouping, recipients, auto-invoice on delivery with a credit-note path, and the late-price adjustments (hours, final price) with a validation gate before anything is sent.", "plan": "Define accountings at company/parent/department level with VAT and currency per accounting. Configure payment terms/modes, e-invoice profiles (X-Bill/XRechnung) and billing recipients. Support master-agreement skip-the-offer, single or collective monthly invoices with required-field grouping splits, auto-invoice on delivery with cancel→credit-note→reissue, hourly billing after completion, final-price and logged-hour adjustments at delivery, and a validation step with clear ownership before send. Keep payment data in sync with Atlas.", "ids": ["REQ-41", "REQ-42", "REQ-44", "REQ-45", "REQ-46", "REQ-47", "REQ-48", "REQ-43", "REQ-49", "REQ-50", "REQ-58", "REQ-59", "REQ-61", "REQ-51"]}, {"key": "platform", "num": "E7", "title": "Platform, modules & customer self-service", "target": "The architecture seam and the customer-facing channel: order-entry and fulfilment as separate modules with a clean handoff, and the self-service portal where customers select their project and upload files — so one engine serves both operator admin and the portal.", "plan": "Split order-entry and fulfilment into separate modules with a defined handoff contract so each keeps the right business logic. Expose the self-service portal on the same engine: customers pick their project (getting the right references/discount automatically) and upload source files directly instead of emailing them.", "ids": ["REQ-24", "REQ-04", "REQ-55"]}];
+const AC={"REQ-01": ["An order can span one source language and two or more target languages as a single translation project.", "Each target language exists as its own child order that can be opened and worked individually.", "The project is the unit used for grouping, quoting and pricing the related orders together."], "REQ-02": ["A Project view / Order view toggle is available on Translation Orders.", "Project view shows grouped project cards with their child orders; Order view shows the flat list.", "The old pool grouping is no longer used."], "REQ-03": ["A project is linked to a company, not an individual person.", "Customers from the company's sub-hierarchy can be added to the project; cross-company customers cannot.", "References applied by the project resolve from the linked company hierarchy."], "REQ-05": ["Each project holds its own translation memory, glossaries and style guides.", "Selecting the project applies its references to analysis and pricing.", "Two projects on the same company can carry different references."], "REQ-06": ["'Project' and 'Template' have a single agreed definition used consistently across the UI.", "No screen uses the two terms interchangeably for different concepts."], "REQ-56": ["A customer project (workspace) sits above translation projects in the hierarchy.", "Recurring work (e.g. a quarterly magazine) is grouped under one customer project.", "The hierarchy reads Customer project → Translation project → Orders."], "REQ-57": ["Fulfilment orders are shown grouped in a project tree rather than a flat pooled list.", "Expanding a project reveals its orders in context."], "REQ-20": ["Delivery comments/instructions are stored on the project per target language.", "The same instructions are reused across orders of that project without retyping."], "REQ-21": ["When an order is created, the system suggests the best-matching comment set.", "The operator confirms the suggestion rather than composing from scratch."], "REQ-22": ["The operator can override, add or delete comments on a specific order.", "Special scopes (e.g. only highlighted text) can be expressed and are preserved."], "REQ-25": ["An order can be flagged as priority / special-care.", "A priority flag triggers the special-care workflow (e.g. a double delivery check)."], "REQ-26": ["A buffer can be set between the customer deadline and the internal (purchase) deadline.", "Internal deadlines are computed from the customer deadline minus the buffer."], "REQ-27": ["TM-update behaviour is configurable per company/project in the prep step.", "Economy jobs can be set not to write back into the TM."], "REQ-28": ["Reusable workflow templates can be attached to a project.", "The template's steps auto-apply to fulfilment when an order is created."], "REQ-19": ["CAT analysis can be run on the source before an offer is finalized.", "Analysis returns volume and per-language match discounts.", "An offer cannot be completed without available volume."], "REQ-30": ["Supported source formats (Word, Excel, PPT, TXT, XML, IDML/EDML, subtitles, SDLXLIFF…) are accepted.", "Unsupported formats are flagged against the supported/not-supported list on upload."], "REQ-31": ["XML can be uploaded together with an ITS rule file (incl. via API).", "Only translatable parts marked by ITS are counted and translated."], "REQ-32": ["Volume can be counted by words, lines or characters.", "Harder formats (PPT/PDF/Excel) apply a higher rate."], "REQ-33": ["The customer is shown why a format costs more.", "The UI nudges toward cheaper formats (Word/EDML)."], "REQ-34": ["CAT match/discount options are configurable per company.", "Agreed CAT terms apply automatically to that company's analyses."], "REQ-35": ["No CAT accounting is booked between the sales and purchase modules.", "Margin is shown transparently instead."], "REQ-36": ["100% matches can be locked so only lines needing work go to fulfilment.", "A manual recount reflects the locked segments."], "REQ-37": ["XLIFF errors and warnings are surfaced with a classification.", "Each issue links to its location so the source can be fixed without hunting across tools."], "REQ-38": ["IDML/EDML orders route through a DTP step.", "Layout is delivered correctly after translation."], "REQ-29": ["An offer can be started from just a client name and one or more language pairs, with no existing order.", "A brand-new client (no record) can be entered inline and used immediately."], "REQ-07": ["The offer is attached to the translation project.", "One offer covers all of the project's target languages."], "REQ-08": ["Multiple alternate offers (delivery/product/price variants) can be built side by side.", "Each alternate is sent and tracked independently without rebuilding the offer."], "REQ-09": ["A multi-language offer clearly shows every language it covers.", "The operator is warned before sending what looks like a single-language offer by mistake."], "REQ-10": ["Only delivery modes realistic for the volume × language pair are offered.", "Impossible modes are disabled and show the reason."], "REQ-11": ["Every offer carries a clear status (draft → sent → accepted).", "The current state of each offer is visible at a glance."], "REQ-12": ["A customer can accept an offer from a link or tweak it in the portal.", "Acceptance updates the offer status without operator retyping."], "REQ-13": ["On acceptance the operator sets the real delivery deadline.", "The system checks the deadline still fits the delivery mode and warns otherwise."], "REQ-52": ["An incoming request email is parsed into a draft offer (client, language pairs, volume).", "Every pre-filled field is editable before anything is sent.", "Low-confidence/undetected fields are flagged for the operator."], "REQ-53": ["Default rules auto-generate the suitable offer(s) for a request.", "The operator reviews and adjusts rather than building each offer from scratch."], "REQ-23": ["The self-service portal and operator admin use one shared options engine.", "Valid options shown to the customer match those available to the operator."], "REQ-64": ["Follow-up reminders are driven by date and order status.", "Email alerts fire for offers waiting on the operator (e.g. around holidays)."], "REQ-65": ["Offer letter templates are reusable and admin-managed, per language.", "An operator composes an offer from consistent template components."], "REQ-62": ["Price is computed from language, specialization and delivery-mode factors.", "Pricing stays consistent beyond fixed special prices."], "REQ-14": ["Quick discount tools and low/high scenarios are available while quoting.", "A discount can be applied without an external calculator."], "REQ-15": ["Margin is shown live while quoting.", "The offer cannot drop below the configured minimum margin without a warning."], "REQ-16": ["Margin is based on real supplier costs pulled from Atlas.", "The cost shown reflects the actual purchase cost, not an estimate."], "REQ-18": ["Contract and per-language/product special prices can be configured.", "Agreed rates apply automatically when the matching conditions are met."], "REQ-39": ["Special prices are keyed by language pair × type × product × mode with a billing unit.", "The matching contract price is applied automatically."], "REQ-40": ["Price matrices support wildcards.", "Matrices can be bulk-imported from Excel instead of entered by hand."], "REQ-63": ["Volume/loyalty and threshold discounts apply automatically.", "Agreed discounts are not re-entered by hand each order."], "REQ-54": ["The operator can override the algorithm price with an agreed price.", "The margin impact of the override remains visible."], "REQ-17": ["Add-ons are configured at customer/project level.", "Certification/DTP/minimum-price add-ons auto-apply and are not missed."], "REQ-66": ["A security surcharge is auto-added for confidential orders.", "The extra handling is always charged."], "REQ-67": ["Add-ons are split into customer-facing and internal.", "Internal sales↔purchase items stay hidden from the customer."], "REQ-68": ["Express/weekend/urgent surcharges can be applied.", "Surcharges apply even on tender prices where configured."], "REQ-60": ["No time estimate is shown on the offer for time-based jobs.", "The operator does not commit to a duration source quality could blow past."], "REQ-69": ["Each market/division can use its own price calculator.", "Swiss and German pricing can differ within one system."], "REQ-41": ["Accountings (billing entities) are defined at company/parent level, including departments.", "Entities are reused across that company's orders."], "REQ-42": ["VAT and currency are handled per accounting.", "EU customers are billed net with VAT; non-EU without VAT."], "REQ-44": ["Payment terms and modes are configurable with a default.", "Each customer is billed on their agreed terms."], "REQ-45": ["E-invoice profiles (X-Bill / XRechnung) are supported.", "Customers whose systems scan invoices can ingest the output."], "REQ-46": ["A customer can be set to single invoices or collective monthly invoices.", "Billing matches the customer's chosen preference."], "REQ-47": ["Required/specific fields and grouping are configurable.", "Collective invoices split correctly by person or project."], "REQ-48": ["Invoice recipient and address are configurable.", "The invoice reaches the controlled recipient."], "REQ-43": ["A master-agreement flag can skip the offer step.", "Trusted customers' orders go straight to purchase."], "REQ-49": ["Invoices auto-generate on delivery.", "A cancel → credit-note → reissue path produces clean corrections."], "REQ-50": ["Hourly orders bill after completion using purchase hours.", "The final price reflects actual hours, not an upfront estimate."], "REQ-58": ["The final customer price can be set at the end of fulfilment.", "Late-known costs (DTP, PDF, hours) are billed accurately."], "REQ-59": ["Logged hours can be adjusted at the delivery step.", "The customer price reflects actual time spent across steps."], "REQ-61": ["A validation step runs before an invoice is sent.", "Amounts and costs are checked with clear ownership."], "REQ-51": ["Payment/accounting data is integrated with Atlas.", "It can be maintained via portal or operator as a single source of truth."], "REQ-24": ["Order-entry and fulfilment are separate modules.", "A clean handoff passes the order between them so each keeps the right business logic."], "REQ-04": ["Where a company has projects, the customer can select the project on their order.", "Selecting it applies the correct references and discount automatically."], "REQ-55": ["Customers can upload source files in the self-service portal.", "Portal uploads feed the same analysis as operator-entered files."]};
+const acOf=(id)=>AC[id]||[];
+
 /* ---- User stories per requirement ---- */
 const STORIES={
  "REQ-01":"As a sales operator, I want an order to be a translation project spanning one source and multiple target languages, so that related work is grouped, quoted and priced together.",
@@ -722,6 +727,7 @@ const SALES_NAV = [
   {key:"invoicing", label:"Invoicing & Pricing", icon:"receipt"},
   {key:"requirements", label:"Requirements", icon:"list"},
   {key:"coverage", label:"Spec coverage", icon:"check"},
+  {key:"epics", label:"Epics & plan", icon:"map"},
 ];
 function Icon({name, className}){
   const p={width:16,height:16,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round",className};
@@ -736,6 +742,7 @@ function Icon({name, className}){
     receipt:<React.Fragment><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></React.Fragment>,
     list:<React.Fragment><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></React.Fragment>,
     check:<React.Fragment><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></React.Fragment>,
+    map:<React.Fragment><path d="m9 18-6 3V6l6-3 6 3 6-3v15l-6 3-6-3Z"/><path d="M9 3v15M15 6v15"/></React.Fragment>,
   };
   return <svg {...p}>{paths[name]}</svg>;
 }
@@ -2654,6 +2661,118 @@ function Coverage({openDoc}){
   );
 }
 
+
+/* ============================ SCREEN: EPICS PLAN ============================ */
+function EpicStoryRow({id, openDoc}){
+  const [open,setOpen]=useState(false);
+  const r=REQS.find(x=>x.id===id); if(!r) return null;
+  const st=STATUS_OF(r); const crit=acOf(id);
+  return (
+    <div className="border-b border-zinc-100 last:border-0">
+      <button onClick={()=>setOpen(o=>!o)} className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-zinc-50">
+        <span className={cx("mt-0.5 text-zinc-400 transition-transform", open&&"rotate-90")}>▸</span>
+        <span className="font-mono text-[11px] text-zinc-500 mt-0.5 w-16 shrink-0">{id}</span>
+        <span className="flex-1 min-w-0">
+          <span className="text-sm text-zinc-800">{storyOf(id)}</span>
+        </span>
+        <Badge className={statusClass(st)}>{st}</Badge>
+      </button>
+      {open && (
+        <div className="pl-[4.75rem] pr-4 pb-4 space-y-3">
+          <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">Acceptance criteria</div>
+          <ul className="space-y-1.5">
+            {crit.map((c,i)=>(
+              <li key={i} className="flex items-start gap-2 text-sm text-zinc-700">
+                <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border border-zinc-300 text-[10px] text-zinc-300">✓</span>
+                <span>{c}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center gap-3 pt-1">
+            <button onClick={()=>openDoc(id)} className="text-[12px] font-medium text-zinc-900 underline underline-offset-2 hover:text-zinc-600">Open requirement detail →</button>
+            <span className="text-[11px] text-zinc-400">{r.title} · {MEETINGS[r.meeting]?MEETINGS[r.meeting].tag:r.meeting}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EpicCard({epic, openDoc, expanded, onToggle}){
+  const roll=useMemo(()=>{ const c={Built:0,Partial:0,Planned:0}; epic.ids.forEach(id=>{ const r=REQS.find(x=>x.id===id); if(!r) return; const s=STATUS_OF(r); if(s.startsWith("Built"))c.Built++; else if(s.startsWith("Mock"))c.Partial++; else c.Planned++; }); return c; },[epic]);
+  const n=epic.ids.length;
+  return (
+    <Card className="overflow-hidden">
+      <button onClick={onToggle} className="w-full text-left p-5 hover:bg-zinc-50/60">
+        <div className="flex items-start gap-4">
+          <div className="shrink-0 rounded-lg bg-zinc-900 text-white h-9 w-9 flex items-center justify-center text-sm font-bold">{epic.num}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-bold text-zinc-900">{epic.title}</h2>
+              <span className="text-[11px] text-zinc-400">· {n} stories</span>
+            </div>
+            <p className="text-sm text-zinc-600 mt-1.5"><span className="font-semibold text-zinc-700">Targets:</span> {epic.target}</p>
+            <div className="mt-3 flex items-center gap-2">
+              <div className="h-1.5 w-40 rounded-full bg-zinc-100 overflow-hidden flex">
+                <div className="h-full bg-emerald-500" style={{width:(roll.Built/n*100)+"%"}}/>
+                <div className="h-full bg-amber-400" style={{width:(roll.Partial/n*100)+"%"}}/>
+                <div className="h-full bg-rose-300" style={{width:(roll.Planned/n*100)+"%"}}/>
+              </div>
+              <span className="text-[11px] text-zinc-400">{roll.Built} built · {roll.Partial} partial · {roll.Planned} planned</span>
+              <span className="ml-auto text-zinc-400 text-sm">{expanded?"Hide":"View"} stories {expanded?"▲":"▼"}</span>
+            </div>
+          </div>
+        </div>
+      </button>
+      {expanded && (
+        <div className="border-t border-zinc-100">
+          <div className="px-5 py-4 bg-zinc-50/50 border-b border-zinc-100">
+            <div className="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold mb-1">Plan of implementation</div>
+            <p className="text-sm text-zinc-600">{epic.plan}</p>
+          </div>
+          <div className="divide-y divide-zinc-100">
+            {epic.ids.map(id=><EpicStoryRow key={id} id={id} openDoc={openDoc}/>)}
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function EpicsPlan({openDoc}){
+  const [open,setOpen]=useState({});
+  const allIds = EPICS2.flatMap(e=>e.ids);
+  const toggle=(k)=>setOpen(o=>({...o,[k]:!o[k]}));
+  const expandAll=()=>{ const all={}; EPICS2.forEach(e=>all[e.key]=true); setOpen(all); };
+  const collapseAll=()=>setOpen({});
+  const totals=useMemo(()=>{ const c={Built:0,Partial:0,Planned:0}; allIds.forEach(id=>{ const r=REQS.find(x=>x.id===id); if(!r)return; const s=STATUS_OF(r); if(s.startsWith("Built"))c.Built++; else if(s.startsWith("Mock"))c.Partial++; else c.Planned++; }); return c; },[]);
+  return (
+    <div className="p-6 space-y-5 fade-in">
+      <div>
+        <h1 className="text-xl font-bold">Epics & delivery plan</h1>
+        <p className="text-sm text-zinc-500 max-w-3xl">The {allIds.length} requirements gathered across the Sales Deep Dive meetings, organised into {EPICS2.length} epics in logical build order (E1 → E7). Each epic states what it targets and a plan of implementation; expand it to see its user stories with acceptance criteria. Click any requirement to open its full detail and meeting source.</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="p-4"><div className="text-xs text-zinc-500">Epics</div><div className="text-2xl font-bold">{EPICS2.length}</div><div className="text-[11px] text-zinc-400 mt-1">logical build phases E1–E7</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">User stories</div><div className="text-2xl font-bold">{allIds.length}</div><div className="text-[11px] text-zinc-400 mt-1">one per requirement, each with AC</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">Built in mockup</div><div className="text-2xl font-bold text-emerald-600">{totals.Built}</div><div className="text-[11px] text-zinc-400 mt-1">{totals.Partial} partial · {totals.Planned} planned</div></Card>
+        <Card className="p-4"><div className="text-xs text-zinc-500">Acceptance criteria</div><div className="text-2xl font-bold">{allIds.reduce((a,id)=>a+acOf(id).length,0)}</div><div className="text-[11px] text-zinc-400 mt-1">testable checks across all stories</div></Card>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" onClick={expandAll}>Expand all</Button>
+        <Button variant="outline" size="sm" onClick={collapseAll}>Collapse all</Button>
+      </div>
+
+      <div className="space-y-4">
+        {EPICS2.map(e=><EpicCard key={e.key} epic={e} openDoc={openDoc} expanded={!!open[e.key]} onToggle={()=>toggle(e.key)}/>)}
+      </div>
+      <div className="text-[11px] text-zinc-400">Status reflects how far the clickable mockup demonstrates each story (Built = shown end-to-end · Partial = partially mocked · Planned = not built yet). Acceptance criteria are drawn from the meeting discussions behind each requirement.</div>
+    </div>
+  );
+}
+
 function App(){
   const [route,setRoute]=useState("dashboard");
   const [docReq,setDocReq]=useState(null);
@@ -2669,7 +2788,7 @@ function App(){
 
   const titles={dashboard:"Dashboard",orders:"Translation Orders",builder:"Offer Builder",
     offers:"Offers",templates:"Projects / Templates",comments:"Comments Library",
-    files:"Files & Analysis",invoicing:"Invoicing & Pricing",requirements:"Requirements",coverage:"Spec coverage"};
+    files:"Files & Analysis",invoicing:"Invoicing & Pricing",requirements:"Requirements",coverage:"Spec coverage",epics:"Epics & plan"};
 
   let screen;
   if(route==="dashboard") screen=<Dashboard setRoute={setRoute} openDoc={openDoc}/>;
@@ -2681,6 +2800,7 @@ function App(){
   else if(route==="templates") screen=<Templates openDoc={openDoc}/>;
   else if(route==="comments") screen=<Comments openDoc={openDoc}/>;
   else if(route==="coverage") screen=<Coverage openDoc={openDoc}/>;
+  else if(route==="epics") screen=<EpicsPlan openDoc={openDoc}/>;
   else screen=<Requirements goFeature={goFeature} openDoc={openDoc}/>;
 
   return (
