@@ -561,6 +561,10 @@ video {
   visibility: visible;
 }
 
+.collapse {
+  visibility: collapse;
+}
+
 .fixed {
   position: fixed;
 }
@@ -1127,6 +1131,11 @@ video {
   border-color: rgb(217 249 157 / var(--tw-border-opacity, 1));
 }
 
+.border-orange-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(254 215 170 / var(--tw-border-opacity, 1));
+}
+
 .border-rose-200 {
   --tw-border-opacity: 1;
   border-color: rgb(254 205 211 / var(--tw-border-opacity, 1));
@@ -1259,6 +1268,11 @@ video {
 .bg-lime-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(236 252 203 / var(--tw-bg-opacity, 1));
+}
+
+.bg-orange-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 237 213 / var(--tw-bg-opacity, 1));
 }
 
 .bg-rose-100 {
@@ -1670,6 +1684,11 @@ video {
 .text-lime-700 {
   --tw-text-opacity: 1;
   color: rgb(77 124 15 / var(--tw-text-opacity, 1));
+}
+
+.text-orange-700 {
+  --tw-text-opacity: 1;
+  color: rgb(194 65 12 / var(--tw-text-opacity, 1));
 }
 
 .text-rose-500 {
@@ -2296,6 +2315,12 @@ const MEETINGS = {
     tag: "Sales Deep Dive 6",
     color: "bg-lime-100 text-lime-700 border-lime-200",
     attendees: "Dagna Jurk, Clemens Rodde, Rana Taha Tariq"
+  },
+  M8: {
+    id: "M8",
+    tag: "Sales Deep Dive 8",
+    color: "bg-orange-100 text-orange-700 border-orange-200",
+    attendees: "Clemens Rodde, Dagna Jurk, Rana Taha Tariq"
   }
 };
 
@@ -2996,9 +3021,119 @@ const REQS = [{
   quote: "Switzerland is a high-price market and Germany lower — the price calculator has to handle each division.",
   need: "With all markets in one system, each sales division/market uses its own price calculator (e.g. high Swiss vs lower German rates), configurable at customer / company / project level.",
   impl: "Planned — market-scoped pricing configuration resolved per customer/company/project."
+}, {
+  id: "REQ-70",
+  title: "Two-step order flow: review/prepare → offer/pricing",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "Which is a preparation and then it's a pricing step… I think it would make sense to do it on 2 pages.",
+  need: "Split order entry into two guided steps — a preparation/review step (order data, files, volume, CAT analysis) and a pricing/offer step (per-language prices, discounts, add-ons, alternate offers) — so a single page isn't overloaded.",
+  impl: "Planned — a 'Review order' step precedes the 'Offer' step; the operator moves between them instead of scrolling one long page."
+}, {
+  id: "REQ-71",
+  title: "Consolidated, editable order header (key data grouped at top)",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "The most important order properties should be at the top… all the translation project data should be in one box.",
+  need: "Group the key order/translation-project data — customer, company, project, source→target languages, product (changeable, incl. non-translation products), delivery mode + deadline, specialization — in one box at the top of the order, editable inline.",
+  impl: "Offer Builder header groups customer/company/project, language pairs, delivery deadline and specialization; product selection and full inline editing still to be completed."
+}, {
+  id: "REQ-72",
+  title: "Single files × volume × CAT table with totals row",
+  cat: "Files",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "There should be one table, so not like here with two tables… a total row with all totals for each column.",
+  need: "Show files, volume and CAT analysis in one table with a column per language pair (CAT %) and a totals row, instead of two separate tables.",
+  impl: "Offer Builder shows a files/volume table and a per-target CAT table; consolidating them into one table with a totals row is planned."
+}, {
+  id: "REQ-73",
+  title: "Per-language price lines + project total on the offer",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Dagna Jurk",
+  quote: "Is the offer price for only one language? … we should see each price per language combination and the total, it's a sum up.",
+  need: "Make clear whether a price is per language or for all languages: show each language combination's price as a line and the project total as the offer price.",
+  impl: "Offer Builder shows a project total; per-language price lines in the CAT/price table are planned."
+}, {
+  id: "REQ-74",
+  title: "Project-level, collapsible alternate offers",
+  cat: "Offers",
+  screen: "builder",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "We make alternate offers only on the total translation project… maybe this can be something you can open, like a drop down.",
+  need: "Alternate offers apply to the whole translation project (all languages) and are collapsed by default, opened on demand, since not every order needs them.",
+  impl: "Alternate offers already live on the project; making them collapse by default is planned."
+}, {
+  id: "REQ-75",
+  title: "Unified translation-projects list as single entry point",
+  cat: "Architecture",
+  screen: "orders",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "I don't know if you need a separate page about offers… we have only translation projects and then we go in… same list, filtered by order entry vs fulfilment.",
+  need: "Replace separate Offer Builder / Offers / Orders pages with one translation-projects list, filtered by workflow stage (order entry vs fulfilment); the view is guided and changes per step with a 'next step' progression.",
+  impl: "Planned — a single project list with stage filters and a guided step flow; the current prototype still shows separate screens (feedback captured)."
+}, {
+  id: "REQ-76",
+  title: "Offer acknowledgement tracking",
+  cat: "Offers",
+  screen: "offers",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "Reminder and see the list of sent out offers waiting for the acknowledgement and the possibility to say, okay, I sent out the acknowledgement.",
+  need: "After sending, the operator can see sent offers awaiting acknowledgement and mark acknowledgement received — beyond date-based reminders.",
+  impl: "Planned — an acknowledgement state and view on the Offers screen."
+}, {
+  id: "REQ-77",
+  title: "Create a new customer and assign to a company",
+  cat: "Projects",
+  screen: "orders",
+  meeting: "M8",
+  speaker: "Dagna Jurk",
+  quote: "How to create a new customer and how to put him to an existing company or create a new company.",
+  need: "During order entry the operator can create a new customer and attach it to an existing company, or create a new company.",
+  impl: "Planned — a customer/company creation flow reachable from order entry."
+}, {
+  id: "REQ-78",
+  title: "External procurement / e-invoicing integration (Ariba, Coupa)",
+  cat: "Invoicing",
+  screen: "invoicing",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "They have to interfere with Ariba and with Coupa… in future we can automate this using the APIs of these systems.",
+  need: "Integrate with external procurement/e-invoicing systems (Ariba, Coupa) via their APIs to automate the currently-manual special invoice flows.",
+  impl: "Planned — connectors to Ariba/Coupa for invoice submission; extends the e-invoice profiles."
+}, {
+  id: "REQ-79",
+  title: "Business areas & cost centers (UBS) as maintainable fields",
+  cat: "Invoicing",
+  screen: "invoicing",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "The complexity around business areas and cost centers in the UBS world… specific fields, maintainable, used in the payment process.",
+  need: "Support business areas and cost centers (e.g. UBS) as specific, maintainable fields on orders/accountings, viewable by operator and customer and used in the payment process.",
+  impl: "Planned — business-area/cost-center fields on the accounting/order with a maintenance UI."
+}, {
+  id: "REQ-80",
+  title: "Customer portal consolidation & channel catalogue",
+  cat: "Channels",
+  screen: "orders",
+  meeting: "M8",
+  speaker: "Clemens Rodde",
+  quote: "We have a lot of customer portals, but maybe only half are used… look through the customer portals that are frequently used.",
+  need: "Consolidate the many existing customer portals into one unified portal, and inventory current customer channels (portals, APIs, web services for UBS, Swisscom, etc.) to derive customer-side requirements.",
+  impl: "Planned — a channel inventory and a single consolidated customer portal."
 }];
 const CATS = ["Projects", "Offers", "Pricing", "Comments", "Channels", "Workflow", "Architecture", "Files", "Invoicing"];
-const STATUS_OF = r => ["REQ-06", "REQ-18", "REQ-45", "REQ-51", "REQ-52", "REQ-53", "REQ-54", "REQ-55", "REQ-56", "REQ-58", "REQ-59", "REQ-60", "REQ-61", "REQ-62", "REQ-63", "REQ-64", "REQ-66", "REQ-67", "REQ-68", "REQ-69"].includes(r.id) ? "Planned" : ["REQ-16", "REQ-27", "REQ-28", "REQ-25", "REQ-31", "REQ-33", "REQ-35", "REQ-36", "REQ-37", "REQ-38", "REQ-40", "REQ-42", "REQ-43", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-57", "REQ-65"].includes(r.id) ? "Mock / partial" : "Built (mock)";
+const STATUS_OF = r => ["REQ-06", "REQ-18", "REQ-45", "REQ-51", "REQ-52", "REQ-53", "REQ-54", "REQ-55", "REQ-56", "REQ-58", "REQ-59", "REQ-60", "REQ-61", "REQ-62", "REQ-63", "REQ-64", "REQ-66", "REQ-67", "REQ-68", "REQ-69", "REQ-70", "REQ-75", "REQ-76", "REQ-77", "REQ-78", "REQ-79", "REQ-80"].includes(r.id) ? "Planned" : ["REQ-16", "REQ-27", "REQ-28", "REQ-25", "REQ-31", "REQ-33", "REQ-35", "REQ-36", "REQ-37", "REQ-38", "REQ-40", "REQ-42", "REQ-43", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-57", "REQ-65", "REQ-71", "REQ-72", "REQ-73", "REQ-74"].includes(r.id) ? "Mock / partial" : "Built (mock)";
 const statusClass = st => st === "Built (mock)" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : st === "Planned" ? "bg-zinc-100 text-zinc-500 border-zinc-200" : st === "Dropped" ? "bg-zinc-100 text-zinc-400 border-zinc-200 line-through" : "bg-amber-50 text-amber-700 border-amber-200";
 const imgFor = id => (typeof window !== "undefined" && window.REQ_IMAGES || {})[id];
 
@@ -3190,7 +3325,7 @@ const EPICS = [{
   key: "quoting",
   title: "2 · Quoting & offers",
   desc: "Building offers with alternates and delivery options, and the accept-to-order lifecycle across channels.",
-  ids: ["REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-23", "REQ-53", "REQ-64", "REQ-65"]
+  ids: ["REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-23", "REQ-53", "REQ-64", "REQ-65", "REQ-70", "REQ-71", "REQ-73", "REQ-74", "REQ-76"]
 }, {
   key: "pricing",
   title: "3 · Pricing, discounts & margin",
@@ -3200,22 +3335,22 @@ const EPICS = [{
   key: "analysis",
   title: "4 · Files, analysis & quality prep",
   desc: "Source formats, CAT analysis, counting, TM handling and XLIFF fixing before offering or handoff.",
-  ids: ["REQ-19", "REQ-27", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-36", "REQ-37", "REQ-38"]
+  ids: ["REQ-19", "REQ-27", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-36", "REQ-37", "REQ-38", "REQ-72"]
 }, {
   key: "projects",
   title: "5 · Projects, templates & instructions",
   desc: "Reusable project templates, references, comments/instructions, priority and workflow.",
-  ids: ["REQ-03", "REQ-05", "REQ-06", "REQ-20", "REQ-21", "REQ-22", "REQ-25", "REQ-26", "REQ-28", "REQ-56"]
+  ids: ["REQ-03", "REQ-05", "REQ-06", "REQ-20", "REQ-21", "REQ-22", "REQ-25", "REQ-26", "REQ-28", "REQ-56", "REQ-77"]
 }, {
   key: "invoicing",
   title: "6 · Invoicing & accounting",
   desc: "Accountings, VAT, payment terms, invoice profiles, grouping and credit notes.",
-  ids: ["REQ-41", "REQ-42", "REQ-43", "REQ-44", "REQ-45", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-51", "REQ-58", "REQ-59", "REQ-61"]
+  ids: ["REQ-41", "REQ-42", "REQ-43", "REQ-44", "REQ-45", "REQ-46", "REQ-47", "REQ-48", "REQ-49", "REQ-50", "REQ-51", "REQ-58", "REQ-59", "REQ-61", "REQ-78", "REQ-79"]
 }, {
   key: "platform",
   title: "7 · Platform & architecture",
   desc: "How order entry and fulfilment relate as modules and how data flows between them.",
-  ids: ["REQ-24", "REQ-35", "REQ-57"]
+  ids: ["REQ-24", "REQ-35", "REQ-57", "REQ-75", "REQ-80"]
 }];
 const GROUP_OF = {};
 EPICS.forEach(e => e.ids.forEach(id => {
@@ -3230,7 +3365,7 @@ const EPICS2 = [{
   "title": "Foundations — project model & customer hierarchy",
   "target": "Establish the core objects the whole order-entry module hangs off: the translation project (one source → many targets), the customer-project workspace above it, the link to the company hierarchy, and the references (TM, glossaries, style guides) a project carries. Nothing can be quoted, priced or invoiced correctly until these exist.",
   "plan": "Model the three-level hierarchy (Customer project → Translation project → Orders). Introduce the Translation Orders screen with a Project view / Order view toggle that replaces the old pooling. Bind projects to a company and its sub-hierarchy, attach per-project references, and lock the 'project' vs 'template' terminology before building UI on top.",
-  "ids": ["REQ-01", "REQ-02", "REQ-56", "REQ-57", "REQ-03", "REQ-06", "REQ-05"]
+  "ids": ["REQ-01", "REQ-02", "REQ-56", "REQ-57", "REQ-03", "REQ-06", "REQ-05", "REQ-77"]
 }, {
   "key": "projectcfg",
   "num": "E2",
@@ -3244,14 +3379,14 @@ const EPICS2 = [{
   "title": "Source files, analysis & quality prep",
   "target": "Get a trustworthy volume and match analysis before anything is quoted. Covers accepted source formats, XML/ITS handling, volume counting, CAT analysis and the clean-up (100%-match locking, XLIFF fixing, DTP) that precedes handoff — plus the finance rule that there is no inter-module CAT accounting.",
   "plan": "Enforce the supported-format list on upload and support XML+ITS (incl. via API). Count volume by words/lines/characters with format-based rates and run CAT analysis to produce billable volume and match discounts, with company-level CAT options. Add 100%-match locking/recount, XLIFF error surfacing with classification, and DTP for IDML/EDML. Keep margin transparent instead of booking CAT between modules.",
-  "ids": ["REQ-19", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-35", "REQ-36", "REQ-37", "REQ-38"]
+  "ids": ["REQ-19", "REQ-30", "REQ-31", "REQ-32", "REQ-33", "REQ-34", "REQ-35", "REQ-36", "REQ-37", "REQ-38", "REQ-72"]
 }, {
   "key": "quoting",
   "num": "E4",
   "title": "Quoting — offers, alternates & the accept lifecycle",
   "target": "Everything the operator does to produce and send a quote: start an offer from a client + language pairs (or an email), build multi-language offers with sendable alternates, offer only realistic delivery modes, move offers through clear states, accept them and set the real deadline — across both the self-service portal and operator admin.",
   "plan": "Attach the offer to the translation project so one offer spans all target languages, with a multi-language visibility hint. Add alternate offers (product/delivery/price variants) each sent and tracked on its own, auto-filtered to realistic delivery modes. Seed drafts from inbound email and from default-offer rules the operator reviews. Drive a draft→sent→accepted lifecycle with link/portal acceptance, a deadline fit-check on accept, follow-up reminders and reusable offer-letter templates.",
-  "ids": ["REQ-29", "REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-52", "REQ-53", "REQ-23", "REQ-64", "REQ-65"]
+  "ids": ["REQ-29", "REQ-07", "REQ-08", "REQ-09", "REQ-10", "REQ-11", "REQ-12", "REQ-13", "REQ-52", "REQ-53", "REQ-23", "REQ-64", "REQ-65", "REQ-70", "REQ-71", "REQ-73", "REQ-74", "REQ-76"]
 }, {
   "key": "pricing",
   "num": "E5",
@@ -3265,14 +3400,14 @@ const EPICS2 = [{
   "title": "Invoicing & accounting",
   "target": "Bill accepted work correctly: accountings and billing entities at company/parent level, VAT/currency, payment terms, e-invoice profiles, single vs collective invoices with correct grouping, recipients, auto-invoice on delivery with a credit-note path, and the late-price adjustments (hours, final price) with a validation gate before anything is sent.",
   "plan": "Define accountings at company/parent/department level with VAT and currency per accounting. Configure payment terms/modes, e-invoice profiles (X-Bill/XRechnung) and billing recipients. Support master-agreement skip-the-offer, single or collective monthly invoices with required-field grouping splits, auto-invoice on delivery with cancel→credit-note→reissue, hourly billing after completion, final-price and logged-hour adjustments at delivery, and a validation step with clear ownership before send. Keep payment data in sync with Atlas.",
-  "ids": ["REQ-41", "REQ-42", "REQ-44", "REQ-45", "REQ-46", "REQ-47", "REQ-48", "REQ-43", "REQ-49", "REQ-50", "REQ-58", "REQ-59", "REQ-61", "REQ-51"]
+  "ids": ["REQ-41", "REQ-42", "REQ-44", "REQ-45", "REQ-46", "REQ-47", "REQ-48", "REQ-43", "REQ-49", "REQ-50", "REQ-58", "REQ-59", "REQ-61", "REQ-51", "REQ-78", "REQ-79"]
 }, {
   "key": "platform",
   "num": "E7",
   "title": "Platform, modules & customer self-service",
   "target": "The architecture seam and the customer-facing channel: order-entry and fulfilment as separate modules with a clean handoff, and the self-service portal where customers select their project and upload files — so one engine serves both operator admin and the portal.",
   "plan": "Split order-entry and fulfilment into separate modules with a defined handoff contract so each keeps the right business logic. Expose the self-service portal on the same engine: customers pick their project (getting the right references/discount automatically) and upload source files directly instead of emailing them.",
-  "ids": ["REQ-24", "REQ-04", "REQ-55"]
+  "ids": ["REQ-24", "REQ-04", "REQ-55", "REQ-75", "REQ-80"]
 }];
 const AC = {
   "REQ-01": ["An order can span one source language and two or more target languages as a single translation project.", "Each target language exists as its own child order that can be opened and worked individually.", "The project is the unit used for grouping, quoting and pricing the related orders together."],
@@ -3343,7 +3478,18 @@ const AC = {
   "REQ-51": ["Payment/accounting data is integrated with Atlas.", "It can be maintained via portal or operator as a single source of truth."],
   "REQ-24": ["Order-entry and fulfilment are separate modules.", "A clean handoff passes the order between them so each keeps the right business logic."],
   "REQ-04": ["Where a company has projects, the customer can select the project on their order.", "Selecting it applies the correct references and discount automatically."],
-  "REQ-55": ["Customers can upload source files in the self-service portal.", "Portal uploads feed the same analysis as operator-entered files."]
+  "REQ-55": ["Customers can upload source files in the self-service portal.", "Portal uploads feed the same analysis as operator-entered files."],
+  "REQ-70": ["Order entry presents a preparation/review step and a separate pricing/offer step.", "The review step holds order data, files, volume and CAT analysis; the offer step holds prices, discounts, add-ons and alternate offers.", "The operator can move between the two steps without losing entered data."],
+  "REQ-71": ["Customer, company, project, source→target languages, product, delivery mode, deadline and specialization appear together at the top of the order.", "The product can be changed (including to non-translation products).", "Header fields are editable inline without leaving the order."],
+  "REQ-72": ["Files, volume and CAT analysis appear in a single table.", "There is one column per language pair showing the CAT match, and a totals row across all columns.", "The old two-table layout is replaced."],
+  "REQ-73": ["Each language combination shows its own price as a line item.", "The project total is shown as the offer price (a sum of the lines).", "It is always clear whether a displayed price is per language or for all languages."],
+  "REQ-74": ["Alternate offers are created at the translation-project level and cover all target languages.", "Alternate offers are collapsed by default and opened on demand.", "An order with no alternates is not cluttered by the control."],
+  "REQ-75": ["There is one translation-projects list used as the single entry point.", "The list can be filtered by workflow stage (order entry vs fulfilment).", "Separate Offer Builder / Offers / Orders pages are replaced by a guided, stage-aware view with a 'next step' action."],
+  "REQ-76": ["Sent offers awaiting acknowledgement are listed.", "The operator can mark an offer's acknowledgement as received.", "Acknowledgement tracking is distinct from date-based reminders."],
+  "REQ-77": ["A new customer can be created during order entry.", "The new customer can be attached to an existing company or a new company can be created.", "The created customer/company is immediately usable on the order."],
+  "REQ-78": ["Invoices can be submitted to external procurement systems (Ariba, Coupa) via their APIs.", "Flows that are manual today are automated through these integrations."],
+  "REQ-79": ["Business areas and cost centers are available as specific fields on the order/accounting.", "These fields are maintainable and used in the payment process.", "Operator and customer can view the relevant structures."],
+  "REQ-80": ["Current customer channels (portals, APIs, web services) are catalogued for the main customers.", "A single consolidated customer portal replaces the many existing portals.", "Unused portals are identified for retirement."]
 };
 const acOf = id => AC[id] || [];
 
@@ -3417,7 +3563,18 @@ const STORIES = {
   "REQ-66": "As a sales operator, I want a security surcharge auto-added for confidential orders, so that the extra handling is always charged.",
   "REQ-67": "As a sales operator, I want add-ons split into customer-facing and internal, so that sales↔purchase invoicing items stay hidden from the customer.",
   "REQ-68": "As a sales operator, I want express/weekend/urgent surcharges applied (even on tender prices), so that rush work is priced correctly.",
-  "REQ-69": "As finance, I want each market/division to use its own price calculator, so that Swiss and German pricing can differ within one system."
+  "REQ-69": "As finance, I want each market/division to use its own price calculator, so that Swiss and German pricing can differ within one system.",
+  "REQ-70": "As a sales operator, I want order entry split into a review step and a pricing step, so that each screen shows only what I need instead of one overloaded page.",
+  "REQ-71": "As a sales operator, I want the key order data grouped and editable at the top of the order, so that I can see and change customer, company, project, languages, product, delivery and specialization in one place.",
+  "REQ-72": "As a sales operator, I want files, volume and CAT analysis in one table with a totals row, so that I read the whole analysis at a glance.",
+  "REQ-73": "As a sales operator, I want each language combination's price plus the project total on the offer, so that it is always clear whether a price is per language or for all.",
+  "REQ-74": "As a sales operator, I want alternate offers to apply to the whole project and stay collapsed until needed, so that simple orders are not cluttered with options.",
+  "REQ-75": "As a sales operator, I want one translation-projects list filtered by workflow stage, so that I work from a single guided view instead of separate offer and order pages.",
+  "REQ-76": "As a sales operator, I want to track which sent offers are awaiting acknowledgement and mark them acknowledged, so that nothing waits unnoticed after sending.",
+  "REQ-77": "As a sales operator, I want to create a new customer and attach it to an existing or new company during order entry, so that first-time requests do not block the offer.",
+  "REQ-78": "As finance, I want invoices pushed to external procurement systems (Ariba, Coupa) via API, so that today's manual special-invoice work is automated.",
+  "REQ-79": "As an operator, I want business areas and cost centers (e.g. UBS) as maintainable fields used in the payment process, so that complex billing structures are captured correctly.",
+  "REQ-80": "As a product owner, I want the many customer portals consolidated into one and current channels catalogued, so that customer-side requirements are clear and portals are reduced."
 };
 const storyOf = id => STORIES[id] || "";
 
@@ -3429,7 +3586,8 @@ const MEETING_URLS = {
   M4: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%204%2D20260818%5F143201%2DMeeting%20Recording%2Emp4",
   M5: "https://dtolk-my.sharepoint.com/personal/taha_tariq_digitaltolk_com/_layouts/15/stream.aspx?id=%2Fpersonal%2Ftaha%5Ftariq%5Fdigitaltolk%5Fcom%2FDocuments%2FInspelningar%2FSales%20req%20demo%2D20260821%5F200653%2DMeeting%20Recording%2Emp4",
   M6: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20dive%205%2D20260820%5F123458%2DMeeting%20Recording%2Emp4",
-  M7: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%206%2D20260821%5F181804%2DMeeting%20Recording%2Emp4"
+  M7: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%206%2D20260821%5F181804%2DMeeting%20Recording%2Emp4",
+  M8: "https://dtolk-my.sharepoint.com/personal/c_rodde_24technology_de/_layouts/15/stream.aspx?id=%2Fpersonal%2Fc%5Frodde%5F24technology%5Fde%2FDocuments%2FInspelningar%2FSales%20Deep%20Dive%208%2D20260825%5F101011%2DBesprechungsaufzeichnung%2Emp4"
 };
 const REQ_TS = {
   "REQ-01": 1044,
@@ -3500,16 +3658,50 @@ const REQ_TS = {
   "REQ-66": 2233,
   "REQ-67": 2483,
   "REQ-68": 2809,
-  "REQ-69": 3247
+  "REQ-69": 3247,
+  "REQ-70": 679,
+  "REQ-71": 118,
+  "REQ-72": 461,
+  "REQ-73": 506,
+  "REQ-74": 610,
+  "REQ-75": 953,
+  "REQ-76": 1175,
+  "REQ-77": 1693,
+  "REQ-78": 1406,
+  "REQ-79": 1459,
+  "REQ-80": 1601
 };
 /* ---- Existing requirements that were revisited in later meetings ---- */
 const ALSO_IN = {
+  "REQ-09": [{
+    m: "M8",
+    sec: 506
+  }],
+  "REQ-45": [{
+    m: "M8",
+    sec: 1406
+  }],
+  "REQ-47": [{
+    m: "M8",
+    sec: 1459
+  }],
+  "REQ-55": [{
+    m: "M8",
+    sec: 1601
+  }],
+  "REQ-57": [{
+    m: "M8",
+    sec: 953
+  }],
   "REQ-01": [{
     m: "M5",
     sec: 509
   }, {
     m: "M6",
     sec: 2561
+  }, {
+    m: "M8",
+    sec: 97
   }],
   "REQ-02": [{
     m: "M5",
@@ -3522,6 +3714,9 @@ const ALSO_IN = {
   "REQ-08": [{
     m: "M5",
     sec: 1168
+  }, {
+    m: "M8",
+    sec: 610
   }],
   "REQ-11": [{
     m: "M7",
@@ -3546,6 +3741,9 @@ const ALSO_IN = {
   "REQ-19": [{
     m: "M5",
     sec: 1645
+  }, {
+    m: "M8",
+    sec: 461
   }],
   "REQ-20": [{
     m: "M5",
