@@ -8338,8 +8338,16 @@ function EpicStoryRow({
     className: statusClass(st)
   }, st)), open && /*#__PURE__*/React.createElement("div", {
     className: "pl-[4.75rem] pr-4 pb-4 space-y-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-[11px] uppercase tracking-wider text-zinc-400 font-semibold"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-[11px] uppercase tracking-wider text-zinc-400 font-semibold mb-1"
+  }, "Description"), /*#__PURE__*/React.createElement("p", {
+    className: "text-sm text-zinc-700 leading-relaxed"
+  }, r.need)), r.impl && /*#__PURE__*/React.createElement("p", {
+    className: "text-[12px] text-zinc-500 leading-relaxed"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold text-zinc-600"
+  }, "In the mockup: "), r.impl), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "text-[11px] uppercase tracking-wider text-zinc-400 font-semibold mb-1.5"
   }, "Acceptance criteria"), /*#__PURE__*/React.createElement("ul", {
     className: "space-y-1.5"
   }, crit.map((c, i) => /*#__PURE__*/React.createElement("li", {
@@ -8347,7 +8355,7 @@ function EpicStoryRow({
     className: "flex items-start gap-2 text-sm text-zinc-700"
   }, /*#__PURE__*/React.createElement("span", {
     className: "mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border border-zinc-300 text-[10px] text-zinc-300"
-  }, "✓"), /*#__PURE__*/React.createElement("span", null, c)))), /*#__PURE__*/React.createElement("div", {
+  }, "✓"), /*#__PURE__*/React.createElement("span", null, c))))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 pt-1"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => openDoc(id),
